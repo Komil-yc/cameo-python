@@ -1,0 +1,7 @@
+queries:  
+  - exclude: *
+extraction:
+  python:
+    python_setup: 
+      version: 2
+      setup_py: false
