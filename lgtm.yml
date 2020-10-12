@@ -1,5 +1,5 @@
 queries:  
-  - exclude: *
+  - exclude: "*"
 extraction:
   python:
     python_setup: 
