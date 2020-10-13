@@ -188,7 +188,6 @@ def fan_power(index):
         return 'Off'
     else:
         return 'N/A'
-    return
 
 def fan_speed_dual(index):
     sys_path = FAN_SYSFILE_PATH + 'fan{}_front_rpm'.format(index)
