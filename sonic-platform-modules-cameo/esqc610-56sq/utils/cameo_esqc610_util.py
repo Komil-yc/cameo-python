@@ -410,13 +410,13 @@ def check_base_bus():
     for bbus in I2C_BASE_BUS.keys():
         install_path = I2C_BASE_BUS[bbus]['path']
         cmd = "echo {} {} > {}/new_device".format(switch['driver'], switch['i2caddr'], install_path)
-        status, output = log_os_system(cmd, 1)
+        log_os_system(cmd, 1)
         time.sleep(1)
         cmd = "ls /sys/bus/i2c/devices/{}-00{}/channel-0".format(bbus[-1],switch['i2caddr'][-2:])
-        result, output = log_os_system(cmd, 1)
+        result = log_os_system(cmd, 1)[0]
         #uninstall 
         cmd = "echo {} > {}/delete_device".format(switch['i2caddr'], install_path)
-        status, output = log_os_system(cmd, 1)
+        log_os_system(cmd, 1)
         if result == 0:
             BASE_BUS = bbus
             break
@@ -581,7 +581,7 @@ def uninstall_sfp():
         for n in range(0,sfp_group['number']):
             sfp_uninst_path = uninst_path+"/channel-{}".format(sfp_group['channels'][n])
             cmd = "echo {} > {}/delete_device".format(sfp_group['i2caddr'], sfp_uninst_path)
-            status, output = log_os_system(cmd, 1)
+            log_os_system(cmd, 1)
             
 def uninstall_i2c_device():
     for dev_name in I2C_DEVICES.keys():
@@ -599,7 +599,7 @@ def uninstall_i2c_device():
             uninst_path = uninst_path+"/channel-{}".format(dev['parent_ch'])
             
         cmd = "echo {} > {}/delete_device".format(dev['i2caddr'], uninst_path)
-        status, output = log_os_system(cmd, 1)
+        log_os_system(cmd, 1)
 
 def uninstall_i2c_switch():
     for switch_name in reversed(switch_install_order):
@@ -617,7 +617,7 @@ def uninstall_i2c_switch():
             uninst_path = uninst_path+"/channel-{}".format(switch['parent_ch'])
             
         cmd = "echo {} > {}/delete_device".format(switch['i2caddr'], uninst_path)
-        status, output = log_os_system(cmd, 1)
+        log_os_system(cmd, 1)
 
 def hw_adjustment():
     global SFP_GROUPS
@@ -663,7 +663,7 @@ def device_install():
     install_sfp()
     update_hwmon()
     restore_install_status()
-        
+    return 0    
     
 def device_uninstall():
     global SFP_GROUPS
@@ -679,10 +679,11 @@ def device_uninstall():
             uninstall_i2c_device()
             uninstall_i2c_switch()
         remove_install_status()
+        return 0
     except IOError as e:
         print(e)
         print("Platform install information file is not exist, please do install first")
-        
+        return 1
 
 i2c_prefix = '/sys/bus/i2c/devices/'
 

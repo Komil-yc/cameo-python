@@ -15,7 +15,6 @@ SLOT_BUS_BASE = 1
 
 def get_attr_value(attr_path):
     retval = 'ERR'
-    fd = 0
     try:
         with open(attr_path, 'r') as fd:
             retval = fd.read()

@@ -97,7 +97,6 @@ def show_sensor_table():
     headers = ['Sensor', 'Temperature', 'High', 'Low', 'Critical High', 'Critical Low']
     table = list()
     temp = list()
-    sensor_table = list()
     
     if bmc_is_exist():
         sensor_table = [

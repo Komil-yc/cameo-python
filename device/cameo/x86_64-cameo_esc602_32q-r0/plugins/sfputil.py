@@ -3,7 +3,6 @@
 try:
     import time
     import json
-    import os
     from sonic_sfp.sfputilbase import SfpUtilBase 
 except ImportError, e:
     raise ImportError (str(e) + "- required module not found")
