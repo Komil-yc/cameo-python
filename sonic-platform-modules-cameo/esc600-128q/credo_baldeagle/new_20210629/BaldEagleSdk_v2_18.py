@@ -17,13 +17,13 @@ import re, sys, os, time, datetime, struct
 from sys import *
 #import numpy as np
 import math
-from ctypes import *
+import ctypes
 sys.path.insert(0,os.getcwd())
 cameolibpath=os.getenv('CAMEOLIB')
 fw_path=os.getenv('CREDO_100G_PATH')
 #libcameo = ctypes.CDLL("libcameo_mdio.so")
-cdll.LoadLibrary(cameolibpath)
-libcameo = CDLL(cameolibpath)
+ctypes.cdll.LoadLibrary(cameolibpath)
+libcameo = ctypes.CDLL(cameolibpath)
 
 #import /usr/lib/python2.7/site-packages/DosComponent/BabbageLib/baldeagle_phoenix_reg as phoenix
 #import /usr/lib/python2.7/site-packages/DosComponent/BabbageLib/baldeagle_eagle_reg as eagle
@@ -33,7 +33,7 @@ import baldeagle_eagle_reg as NrzReg
 try:
     reload(NrzReg)
     reload(Pam4Reg)
-except:
+except NameError:
     pass
         
 ##########################[   0       1       2       3      4      5      6       7       8       9     10      11     12      13     14      15 ] 
@@ -41,15 +41,15 @@ lane_name_list =          [ 'A0',   'A1',   'A2',   'A3',  'A4',  'A5',   'A6', 
 #lane_rx_input_mode_list = [ 'dc',   'dc',   'dc',
 try:
     lane_rx_input_mode_list
-except:
+except NameError:
     lane_rx_input_mode_list = ['dc']*16
 try:
     lane_mode_list
-except:
+except NameError:
     lane_mode_list = ['pam4'] *16
 try:
     chan_est_list
-except:
+except NameError:
     chan_est_list = [1.010,63,62] *16
 
     
@@ -67,39 +67,39 @@ gPrbsPrevCount  = { 'A0': 0,'A1': 0,'A2': 0,'A3': 0,
 MDIO_CONNECTED       = 0
 MDIO_DISCONNECTED    = 1
 MDIO_LOST_CONNECTION = 2
-global gCard;                  
-global gChipName;             gChipName='Baldeagle'
-global gSetupFileName;        gSetupFileName='Baldeagle_RegSetup.txt'
-global gUsbPort;              gUsbPort=0 # eval board USB port0 or port 1, Can run 2 Credo boards in 2 python shells on the same PC
-global gSlice;                gSlice=0 # Slice 0 or 1
-global gRefClkFreq;           gRefClkFreq=195.3125  # 156.25
-global gNrzLanes;             gNrzLanes = [8,9,10,11,12,13,14,15] #[0,1,2,3,4,5,6,7]
-global gPam4Lanes;            gPam4Lanes= [0,1,2,3,4,5,6,7] #[8,9,10,11,12,13,14,15]
-global gPrbsEn;               gPrbsEn=True
-global gPam4_En;              gPam4_En=1
-global gLane;                 gLane=range(16) #[0,1,2,3,4,5,6,7] #or 'ALL'
-global gDebugPrint;           gDebugPrint=1
-global gNrzTxSourceIsCredo;   gNrzTxSourceIsCredo  =1 # 0: means do not touch  NRZ lane's TX taps, as it's driving another NRZ lane's RX
-global gPam4TxSourceIsCredo;  gPam4TxSourceIsCredo =1 # 0: means do not touch PAM4 lane's TX taps, as it's driving another NRZ lane's RX
-global gFecThresh;            gFecThresh=15
-global gSltVer;               gSltVer=0.0
-global gDualSliceMode;        gDualSliceMode=False
-global c; c=Pam4Reg
-global RxPolarityMap
-global TxPolarityMap
-global RxGrayCodeMap
-global TxGrayCodeMap
-global RxPrecoderMap
-global TxPrecoderMap
-global RxMsbLsbMap;   
-global TxMsbLsbMap
-global gLanePartnerMap
-global gFwFileName; gFwFileName = fw_path + '/BE2.fw.2.18.43.bin';
-global gFwFileNameLastLoaded
-global gFecStatusPrevTimeStamp; gFecStatusPrevTimeStamp=[]
-global gFecStatusCurrTimeStamp; gFecStatusCurrTimeStamp=[]
-global gMode_sel;               gMode_sel=True #MDIO:True,  I2C:False
-global gSlice_grop;             gSlice_grop=[]
+gCard                   = None
+gChipName               = 'Baldeagle'
+gSetupFileName          = 'Baldeagle_RegSetup.txt'
+gUsbPort                = 0 # eval board USB port0 or port 1, Can run 2 Credo boards in 2 python shells on the same PC
+gSlice                  = 0 # Slice 0 or 1
+gRefClkFreq             = 195.3125  # 156.25
+gNrzLanes               = [8,9,10,11,12,13,14,15] #[0,1,2,3,4,5,6,7]
+gPam4Lanes              = [0,1,2,3,4,5,6,7] #[8,9,10,11,12,13,14,15]
+gPrbsEn                 = True
+gPam4_En                = 1
+gLane                   = range(16) #[0,1,2,3,4,5,6,7] #or 'ALL'
+gDebugPrint             = 1
+gNrzTxSourceIsCredo     = 1 # 0: means do not touch  NRZ lane's TX taps, as it's driving another NRZ lane's RX
+gPam4TxSourceIsCredo    = 1 # 0: means do not touch PAM4 lane's TX taps, as it's driving another NRZ lane's RX
+gFecThresh              = 15
+gSltVer                 = 0.0
+gDualSliceMode          = False
+c                       = Pam4Reg
+# RxPolarityMap
+# TxPolarityMap
+# RxGrayCodeMap
+# TxGrayCodeMap
+# RxPrecoderMap
+# TxPrecoderMap
+# RxMsbLsbMap;   
+# TxMsbLsbMap
+# gLanePartnerMap
+gFwFileName              = fw_path + '/BE2.fw.2.18.43.bin';
+gFwFileNameLastLoaded    = None
+gFecStatusPrevTimeStamp  = []
+gFecStatusCurrTimeStamp  = []
+gMode_sel                = True #MDIO:True,  I2C:False
+gSlice_grop              = []
 
 for i in range(32):
     gFecStatusPrevTimeStamp.append(time.time());
@@ -115,22 +115,22 @@ gPrbsResetTime=time.time()
 gDebugTuning = False
 try:
     gDebugTuning
-except:
+except NameError:
     gDebugTuning = False
 try:
     gPrint
-except:
+except NameError:
     gPrint = True
 try:
     gLane
-except:
+except NameError:
     gLane = [0]
 
 
 ##########################
 # Define Globals here once
 ########################## SMK Board's TX Source for each lane's RX is its own TX (assuming loop-back)
-global gLanePartnerMap;
+#gLanePartnerMap;
 gLanePartnerMap=[[[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],  [0,8],[0,9],[0,10],[0,11],[0,12],[0,13],[0,14],[0,15]], # Slice 0, TX Source for each lane's RX
                  [[1,0],[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[1,7],  [1,8],[1,9],[1,10],[1,11],[1,12],[1,13],[1,14],[1,15]], # Slice 1, TX Source for each lane's RX
                  [[2,0],[2,1],[2,2],[2,3],[2,4],[2,5],[2,6],[2,7],  [2,8],[2,9],[2,10],[2,11],[2,12],[2,13],[2,14],[2,15]], # Slice 2, TX Source for each lane's RX
@@ -169,8 +169,8 @@ gLanePartnerMap=[[[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],  [0,8],[0,9],
 
 
 ########################## SMK Board's RX and TX Polarities for Slice 0 and 1
-global RxPolarityMap; RxPolarityMap=[]
-global TxPolarityMap; TxPolarityMap=[]
+RxPolarityMap = []
+TxPolarityMap = []
 for i in range(32): RxPolarityMap.append([]);
          #Slice  [A0.............A7, B0,..........B7]
 RxPolarityMap[0]=[0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,0] # Slice 0 lanes, RX Polarity
@@ -243,7 +243,7 @@ TxPolarityMap[31]=[1,1,1,1,1,1,1,1,   1,1,1,1,1,1,1,1] # Slice 31 lanes, TX Pola
 
 
 ########################## Channel Estimates per lane per Slice
-global gChanEst; gChanEst=[]
+gChanEst = []
 for i in range(32): gChanEst.append([]);
          # [Chan Est, OF, HF]
 gChanEst[0]=[[0.0,0,0]]*16 # Slice 0, Channel Estimates for each lane's RX
@@ -281,7 +281,7 @@ gChanEst[31]=[[0.0,0,0]]*16 # Slice 31, Channel Estimates for each lane's RX
 
 
 ########################## PRBS and BER Statistics per lane per Slice
-global gLaneStats; gLaneStats=[]
+gLaneStats = []
 for i in range(32): gLaneStats.append([]);
                  #[PrbsCount, PrbsCount-1, PrbsCount-2, PrbsRstTime, PrbsLastReadoutTime]
 gLaneStats[0]=[[0,0,0,0,0,0,0,0,0,0,0]]*16 # Slice 0, PRBS Statistics for each lane's RX
@@ -318,7 +318,7 @@ gLaneStats[30]=[[0,0,0,0,0,0,0,0,0,0,0]]*16 # Slice 30, PRBS Statistics for each
 gLaneStats[31]=[[0,0,0,0,0,0,0,0,0,0,0]]*16 # Slice 31, PRBS Statistics for each lane's RX
 
 ########################## Line Encoding mode and Data Rate per lane per Slice
-global gEncodingMode; gEncodingMode=[]
+gEncodingMode = []
 for i in range(32): gEncodingMode.append([]);
                  #[PAM4/NRZ, 53.125/25.78125/20.625/10.3125]
 gEncodingMode[0]=[['pam4', 53.125]]*16 # Slice 0, Data Rate for each lane, will be updated by pll() or init_pam4/init_nrz
@@ -354,7 +354,7 @@ gEncodingMode[29]=[['pam4', 53.125]]*16 # Slice 29, Data Rate for each lane, wil
 gEncodingMode[30]=[['pam4', 53.125]]*16 # Slice 30, Data Rate for each lane, will be updated by pll() or init_pam4/init_nrz
 gEncodingMode[31]=[['pam4', 53.125]]*16 # Slice 31, Data Rate for each lane, will be updated by pll() or init_pam4/init_nrz
 
-global gCameo400G_EQ; gCameo400G_EQ=[]
+gCameo400G_EQ = []
 gCameo400G_EQ.append([ \
 {'card':8,'chip':1,'slice':1,'lane':0,'tap1':0,'tap2':-3,'tap3':20,'tap4':8,'tap5':0},
 {'card':8,'chip':1,'slice':1,'lane':1,'tap1':0,'tap2':-3,'tap3':20,'tap4':8,'tap5':0},
@@ -613,7 +613,7 @@ gCameo400G_EQ.append([ \
 {'card':1,'chip':2,'slice':0,'lane':6,'tap1':0,'tap2':-3,'tap3':20,'tap4':8,'tap5':0},
 {'card':1,'chip':2,'slice':0,'lane':7,'tap1':0,'tap2':-3,'tap3':20,'tap4':8,'tap5':0}])
 
-global gCameo100G_EQ; gCameo100G_EQ=[]
+gCameo100G_EQ = []
 gCameo100G_EQ.append([ \
 {'card':1,'chip':1,'slice':1,'lane':0,'tap1':0,'tap2':-3,'tap3':20,'tap4':8,'tap5':0},
 {'card':1,'chip':1,'slice':1,'lane':1,'tap1':0,'tap2':-3,'tap3':20,'tap4':8,'tap5':0},
@@ -1195,7 +1195,7 @@ def config_baldeagle(slice=[0,1], mode='nrz', input_mode='ac', lane='all', cross
     else:
         slices = get_slice_list(slice)
 
-    auto_pol_en=0
+    #auto_pol_en=0
 
 
     for slc in slices:
@@ -1266,8 +1266,9 @@ def config_baldeagle(slice=[0,1], mode='nrz', input_mode='ac', lane='all', cross
 #
 #
 ####################################################################################################
-def config_pam4_nrz_phy(slice=[2,3,6,7,14,15,30,31], mode='nrz', lane=range(4)+range(8,16), cross_mode=False, chip_reset=True):
-    
+#def config_pam4_nrz_phy(slice=[2,3,6,7,14,15,30,31], mode='nrz', lane=range(4)+range(8,16), cross_mode=False, chip_reset=True):
+def config_pam4_nrz_phy(slice=[2,3,6,7,14,15,30,31], mode='nrz', lane=[0,1,2,3,8,9,10,11,12,13,14,15], cross_mode=False, chip_reset=True): 
+ 
     lanes = get_lane_list(lane) 
     if 'RETIME' in mode.upper():
         all_lanes = get_retimer_lane_list(lane, cross_mode)
@@ -1280,7 +1281,7 @@ def config_pam4_nrz_phy(slice=[2,3,6,7,14,15,30,31], mode='nrz', lane=range(4)+r
     else:
         slices = get_slice_list(slice)
 
-    auto_pol_en=0
+    #auto_pol_en=0
 
     for slc in slices:
         sel_slice(slc)
@@ -1310,13 +1311,13 @@ def config_pam4_nrz_phy(slice=[2,3,6,7,14,15,30,31], mode='nrz', lane=range(4)+r
             sel_slice(slc)
             fw_serdes_params(lane=all_lanes)
 
-        if auto_pol_en:
-            for slc in slices:
-                sel_slice(slc)
-                if 'RETIMER' in mode.upper():                
-                    auto_pol(tx_prbs='dis') # Put TX in FUNCTIONAL mode if in RETIMER mode, then run auto RX polarity correction
-                else:            
-                    auto_pol(tx_prbs='en') # Enable TX PRBS Gen if in PHY mode, then run auto RX polarity correction
+        # if auto_pol_en:
+            # for slc in slices:
+                # sel_slice(slc)
+                # if 'RETIMER' in mode.upper():                
+                    # auto_pol(tx_prbs='dis') # Put TX in FUNCTIONAL mode if in RETIMER mode, then run auto RX polarity correction
+                # else:            
+                    # auto_pol(tx_prbs='en') # Enable TX PRBS Gen if in PHY mode, then run auto RX polarity correction
                 
     # for slc in slices:
         # sel_slice(slc)
@@ -1350,7 +1351,7 @@ def config_active_switchover(mode=None):
     global gLane; gLane=all_lanes
         
     if mode!=None and 'init' in mode.lower():
-        slices = slice_power_up_init(slc)
+        #slices = slice_power_up_init(slc)
         init_lane (mode='nrz',lane=all_lanes)
         for ln in range(16): # Set the polarities of the lanes        
             pol(TxPolarityMap[gSlice][ln],RxPolarityMap[gSlice][ln],ln,0)
@@ -1370,7 +1371,7 @@ def config_active_switchover(mode=None):
         fw_reg_wr(128,0)
     else:
         #fw_config_lane    (mode ='nrz', lane = standby_B_lanes)
-        if mode==None and rreg([0x9855,[15,12]])==0xF:  # Already in Crossed mode, switch to Direct mode
+        if mode is None and rreg([0x9855,[15,12]])==0xF:  # Already in Crossed mode, switch to Direct mode
             print("\n Swithing from Cross Mode to Direct Mode")
             cross_mode= False
         else:
@@ -1382,7 +1383,6 @@ def config_active_switchover(mode=None):
  ##############################################################################
 def config_baldeagle_gearbox(slice=[2,3,6,7,14,15,30,31], A_lanes=[0,1,2,3], gearbox_type='100G-1', gearbox_by_fw=True, fec_b_bypass=False):
     #fw_load(gFwFileName)
-
     if '50' in gearbox_type:
         # For 50G-2 Gearbox mode, 3 options supported for A-Lane groups 
         group0_50G=[0] # A_lanes group 1 -> [A0] <-> [ 8, 9]
@@ -1444,7 +1444,7 @@ def config_baldeagle_gearbox(slice=[2,3,6,7,14,15,30,31], A_lanes=[0,1,2,3], gea
         B_lanes=[]
         if all(elem in A_lanes for elem in group0_100G):  # If A_lanes contains [0,1]
             B_lanes+=[8,9,10,11]
-            group0_selected=1
+            #group0_selected=1
         if all(elem in A_lanes for elem in group1_100G):  # If A_lanes contains [2,3]
             B_lanes+=[12,13,14,15]
             group1_selected=1
@@ -1483,7 +1483,7 @@ def config_baldeagle_gearbox(slice=[2,3,6,7,14,15,30,31], A_lanes=[0,1,2,3], gea
             
         for slc in slices:
             sel_slice(slc)
-            start_time=time.time()   # start timer to get gearbox-ready time
+            #start_time=time.time()   # start timer to get gearbox-ready time
             #fw_adapt_wait(max_wait=10, lane=A_lanes+B_lanes, print_en=1)  
             #print("\n...Waiting for FEC Status Lock (fec_wait=%d) ...  "%(fw_reg_rd(14))),
 
@@ -1498,7 +1498,7 @@ def config_baldeagle_gearbox(slice=[2,3,6,7,14,15,30,31], A_lanes=[0,1,2,3], gea
                 sw_config_gearbox_50G (A_lanes,fec_b_byp=fec_b_bypass)
             else:
                 sw_config_gearbox_100G(A_lanes,fec_b_byp=fec_b_bypass)        
-            start_time=time.time()   # start timer to get gearbox-ready time
+            #start_time=time.time()   # start timer to get gearbox-ready time
         
     #for slc in slices:
     #    sel_slice(slc)
@@ -1537,7 +1537,7 @@ def config_baldeagle_bitmux(slice=[0,1], A_lanes=[0,1,2,3], bitmux_type='20G',pr
     sel_slice(slice)
     global gLane
     
-    auto_pol_en=0
+    #auto_pol_en=0
     global RxPolarityMap; RxPolarityMap=[]
                                        #Slice  [A0.............A7, B0,..........B7]
     RxPolarityMap.append([]); RxPolarityMap[0]=[ 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0 ] # Slice 0 lanes, RX Polarity
@@ -1580,9 +1580,9 @@ def config_baldeagle_bitmux(slice=[0,1], A_lanes=[0,1,2,3], bitmux_type='20G',pr
     lanes = get_lane_list(lane=A_lanes+B_lanes)
     gLane=lanes    
     if chip_reset==True:
-        slices = slice_power_up_init(slice)
-    else:
-        slices = get_slice_list(slice)
+        slice_power_up_init(slice) #slices = slice_power_up_init(slice)
+    # else:
+        # slices = get_slice_list(slice)
 
     #init_lane (mode='nrz20',input_mode='ac',lane=A_lanes)
     #init_lane (mode='nrz10',input_mode='ac',lane=B_lanes)
@@ -1598,10 +1598,10 @@ def config_baldeagle_bitmux(slice=[0,1], A_lanes=[0,1,2,3], bitmux_type='20G',pr
 
     #for ln in lanes: # Set Polarity of each lane according the pol_list
     for ln in range(16):
-        pol(TxPolarityMap[slice][ln],RxPolarityMap[slice][ln],ln,0)
+        for Slices in range(slice):
+            pol(TxPolarityMap[Slices][ln],RxPolarityMap[Slices][ln],ln,0)
 
     prbs_mode_select(lane=lanes, prbs_mode='functional')
-
 
     if '53' in bitmux_type:        
         fw_config_bitmux_53G(A_lanes)
@@ -1615,7 +1615,7 @@ def config_baldeagle_bitmux(slice=[0,1], A_lanes=[0,1,2,3], bitmux_type='20G',pr
     fw_bitmux_wait(lane=A_lanes, max_wait=10, print_en=print_en)
 
     prbs_mode_select(lane=lanes, prbs_mode='functional')
-    if auto_pol_en: auto_pol(tx_prbs='dis') # Do not enable TX PRBS Gen if in RETIMER mode, for auto polarity correction
+    #if auto_pol_en: auto_pol(tx_prbs='dis') # Do not enable TX PRBS Gen if in RETIMER mode, for auto polarity correction
     fw_serdes_params(lane=lanes)
     rx_monitor(rst=1,lane=lanes)
 
@@ -1635,7 +1635,7 @@ def opt_tx_taps(slice=0, mode='nrz', input_mode='ac', lane=None):
     main_best = main
     post1_best = post1
     post2_best = post2
-    pre2_next = pre2
+    #pre2_next = pre2
     pre1_next = pre1
     main_next = main
     post1_next = post1
@@ -1659,8 +1659,8 @@ def opt_tx_taps(slice=0, mode='nrz', input_mode='ac', lane=None):
         #serdes_params()
         #time.sleep(1)
         
-        for x in range(-12,0): #pre1 range
-            tx_taps(pre2_next, x, main_next, post1_next, post2_next)
+        for y in range(-12,0): #pre1 range
+            tx_taps(pre2_next, y, main_next, post1_next, post2_next)
             if mode == 'pam4':
                 Eye_post = eye_pam4(lane)
             elif mode == 'nrz':
@@ -1671,14 +1671,14 @@ def opt_tx_taps(slice=0, mode='nrz', input_mode='ac', lane=None):
             if (Eye_post > Eye_best and Ber_post < Ber_best):
                 Eye_best = Eye_post
                 Ber_best = Ber_post
-                pre1_best = x
+                pre1_best = y
             print('\nBest pre 1 setting so far is : %d' %pre1_best)
-            pre1_next = x
+            pre1_next = y
             #serdes_params()
             #time.sleep(1)   
             
-            for x in range(-16,21): #main range
-                tx_taps(pre2_next, pre1_next, x, post1_next, post2_next)
+            for z in range(-16,21): #main range
+                tx_taps(pre2_next, pre1_next, z, post1_next, post2_next)
                 if mode == 'pam4':
                     Eye_post = eye_pam4(lane)
                 elif mode == 'nrz':
@@ -1689,14 +1689,14 @@ def opt_tx_taps(slice=0, mode='nrz', input_mode='ac', lane=None):
                 if (Eye_post > Eye_best and Ber_post < Ber_best):
                     Eye_best = Eye_post
                     Ber_best = Ber_post
-                    main_best = x
+                    main_best = z
                 print('\nBest main setting so far is : %d' %main_best)
-                main_next = x
+                main_next = z
                 #serdes_params()
                 #time.sleep(1)            
             
-                for x in range(-7,0): #post1 range
-                    tx_taps(pre2_next, pre1_next, main_next, x, post2)
+                for p in range(-7,0): #post1 range
+                    tx_taps(pre2_next, pre1_next, main_next, p, post2)
                     if mode == 'pam4':
                         Eye_post = eye_pam4(lane)
                     elif mode == 'nrz':
@@ -1707,13 +1707,13 @@ def opt_tx_taps(slice=0, mode='nrz', input_mode='ac', lane=None):
                     if (Eye_post > Eye_best and Ber_post < Ber_best):
                         Eye_best = Eye_post
                         Ber_best = Ber_post
-                        post1_best = x
+                        post1_best = p
                     print('\nBest post1 setting so far is : %d' %post1_best)
-                    post1_next = x
+                    post1_next = p
                         #time.sleep(1)
                 
-                    for x in range(-3,3): #post2 range
-                        tx_taps(pre2_next, pre1_next, main_next, post1_next, x)
+                    for q in range(-3,3): #post2 range
+                        tx_taps(pre2_next, pre1_next, main_next, post1_next, q)
                         if mode == 'pam4':
                             Eye_post = eye_pam4(lane)
                         elif mode == 'nrz':
@@ -1724,9 +1724,9 @@ def opt_tx_taps(slice=0, mode='nrz', input_mode='ac', lane=None):
                         if (Eye_post > Eye_best and Ber_post < Ber_best):
                             Eye_best = Eye_post
                             Ber_best = Ber_post
-                            post2_best = x
+                            post2_best = q
                         print('\nBest post2 setting so far is : %d' %post2_best)
-                        post2_next = x
+                        post2_next = q
                 
     print ('\nOptimal precursor 2 value is: %d' %pre2_best)
     print ('\nOptimal precursor 1 value is: %d' %pre1_best)
@@ -1765,7 +1765,7 @@ def mdio(connect=None, Slice=None, usb_port=None):
     SWAPPING_USB_PORT=0
     SWAPPING_SLICE=0
                     
-    if (connect==None): # only checking MDIO connection status
+    if (connect is None): # only checking MDIO connection status
         mdio_status = get_mdio_status()
         if (mdio_status == MDIO_DISCONNECTED): 
             print ('\n...Credo MDIO Already Disconnected from USB Port %d Slice %d'%(gUsbPort,gSlice)),
@@ -1777,11 +1777,11 @@ def mdio(connect=None, Slice=None, usb_port=None):
             print ('\n***> Reading back invalid value 0x%04X for Credo Registers' % val0),
             print ('\n***> Disconnecting MDIO on USB Port %d Slice %d'%(gUsbPort,gSlice))
             chip.disconnect()
-            mdio_status = MDIO_DISCONNECTED
+            #mdio_status = MDIO_DISCONNECTED
         
     else: # asked to connect/dis-connect
         if usb_port!=None and usb_port!=gUsbPort:
-            SWAPPING_USB_PORT=1
+            #SWAPPING_USB_PORT=1
             gUsbPort=usb_port
         
         if Slice!=None and Slice!=gSlice:
@@ -1805,7 +1805,7 @@ def mdio(connect=None, Slice=None, usb_port=None):
                     print ('\n***> Disconnecting Python from MDIO on USB Port %d Slice %d'%(gUsbPort,gSlice)),
                     print ('\n***> Fix Dongle Connection Issue and Try again!')
                     chip.disconnect()
-                    mdio_status = MDIO_DISCONNECTED
+                    #mdio_status = MDIO_DISCONNECTED
                     
         elif connect == 0 or connect =='disconnect': # connect == 0 (i.e. Disconnect MDIO)
             mdio_status = get_mdio_status()
@@ -1813,7 +1813,7 @@ def mdio(connect=None, Slice=None, usb_port=None):
                 #chip.connect(phy_addr=gSlice, usb_sel=gUsbPort)
             #chip.disconnect()
             print ('\n...Credo MDIO Disconnected from USB Port %d Slice %d'%(gUsbPort,gSlice))
-            mdio_status = MDIO_DISCONNECTED
+            #mdio_status = MDIO_DISCONNECTED
     time.sleep(0.5)
 ####################################################################################################
 # Select Slice/slicer inside the part to work with.
@@ -1830,14 +1830,14 @@ def sel_slice(slice=None,mdio=None):
     global gUsbPort
 
     if (slice!=None): # asked to connect to a particular Slice inside the same chip, sharing MDIO/I2c bus
-        try:
-            #chip.connect(phy_addr=slice, usb_sel=gUsbPort,mdio=gMode_sel)
-            gSlice=slice
-        except:
-            #chip.connect(phy_addr=slice, usb_sel=gUsbPort,mdio=gMode_sel)
-            gSlice=slice
-            
-                    
+        gSlice=slice 
+        # try:
+            # #chip.connect(phy_addr=slice, usb_sel=gUsbPort,mdio=gMode_sel)
+            # gSlice=slice
+        # except:
+            # #chip.connect(phy_addr=slice, usb_sel=gUsbPort,mdio=gMode_sel)
+            # gSlice=slice
+                                
     return gSlice
 ####################################################################################################
 def get_mdio_status():
@@ -1864,7 +1864,7 @@ def get_mdio_status():
 ###################################################################################################
 def get_slice_list(slice=None):
 
-    if slice==None:          slices=[gSlice] # single slice download mode on the Slice already selected
+    if slice is None:        slices=[gSlice] # single slice download mode on the Slice already selected
     elif type(slice)== int:  slices=[slice]     # single slice download mode 
     elif type(slice)== list: slices=slice       # single slice download mode 
     else:                    slices=[0,1]    # broadcast download mode to both slices
@@ -1877,12 +1877,12 @@ def get_slice_list(slice=None):
 #
 ####################################################################################################
 def get_lane_list(lane=None):
-    if lane==None:            lane=gLane
+    if lane is None:          lane=gLane
     if type(lane)==int:       lanes=[lane]
     elif type(lane)==list:    lanes=lane
     elif type(lane)==str and lane.upper()=='ALL': 
         lanes=range(len(lane_name_list))
-    lanes.sort()
+    lanes.sort()   
     return lanes
 ####################################################################################################
 # register write/read
@@ -1935,7 +1935,7 @@ def rreg(addr, lane = None):
     '''
     read from a register address, register offset or register field
     '''
-    if lane==None: lane=gLane
+    if lane is None: lane=gLane
     
     #lane_mode_list
     if type(addr) == int:
@@ -1946,7 +1946,7 @@ def rreg(addr, lane = None):
         i = 0
         while(i  < (len(addr)-1)):
             full_addr = addr[i]
-            if (addr[i] & 0xf000) == 0: full_addr += lane_offset[lane_name_list[lane]]            
+            if (addr[i] & 0xf000) == 0: full_addr += lane_offset[lane_name_list[lane]]
             val_tmp = MdioRd(full_addr)
             i += 1
             mask = sum([1<<bit for bit in range(addr[i][0], addr[i][-1]-1, -1)])
@@ -1962,7 +1962,7 @@ def rreg(addr, lane = None):
 def wreg_new(addr, val, lane=None, slice=None):
     mdio_log_en=0
     lanes  = get_lane_list(lane)
-    if lane==None: lanes=[gLane[0],gLane[0]+1]
+    if lane is None: lanes=[gLane[0],gLane[0]+1]
     slices = get_slice_list(slice)
 
     if type(addr) == list: # Address and bits given               
@@ -1985,15 +1985,15 @@ def wreg_new(addr, val, lane=None, slice=None):
                 
             if type(addr) == int: # Address given, but no bit, meaning all bits [15:0]
                 MdioWr(full_addr, val)
-                if mdio_log_en: print("wreg( [0x%04X, [%2d,%2d]], 0x%04X, lane=%2d ) # Slice %d "%(full_addr,bit_hi,bit_lo,val,ln, slc))
+                #if mdio_log_en: print("wreg( [0x%04X, [%2d,%2d]], 0x%04X, lane=%2d ) # Slice %d "%(full_addr,bit_hi,bit_lo,val,ln, slc))
             elif type(addr) == list: # Address and bits given               
                 curr_val = MdioRd(full_addr)
                 mask = sum([1<<bit for bit in range(bit_hi, bit_lo-1, -1)])
                 new_val = (curr_val & ~mask) + (val<<bit_lo & mask)
                 MdioWr(full_addr, new_val)
-                if mdio_log_en: print("wreg( [0x%04X, [%2d,%2d]], 0x%04X, lane=%2d ) # Slice %d "%(full_addr,bit_hi,bit_lo,val,ln,slc))
-            else:
-                if mdio_log_en: print("wreg( [0x%04X, [15, 0]], 0x%04X, lane=%2d ) # Slice %d #### Error "%(full_addr,val,ln,slc))
+                #if mdio_log_en: print("wreg( [0x%04X, [%2d,%2d]], 0x%04X, lane=%2d ) # Slice %d "%(full_addr,bit_hi,bit_lo,val,ln,slc))
+            #else:
+                #if mdio_log_en: print("wreg( [0x%04X, [15, 0]], 0x%04X, lane=%2d ) # Slice %d #### Error "%(full_addr,val,ln,slc))
             
             if (reg_addr & 0xf000) != 0: # full address given, exit after writing
                 break
@@ -2005,7 +2005,7 @@ def wreg(addr, val, lane = None):
     write to a register address, register offset or register field
     '''
     #global chip
-    if lane==None: lane=gLane[0]
+    if lane is None: lane=gLane[0]
     if type(addr) == int:
         if (addr & 0xf000) == 0: addr += lane_offset[lane_name_list[lane]]
         MdioWr(addr, val)
@@ -2034,9 +2034,9 @@ def wregMask(addr, mask, val, lane = None):
     '''
     write multiple bit fields, as defined by mask, to a register address
     '''
-    if lane==None: lane=gLane[0]
+    #if lane==None: lane=gLane[0]
     value_old = rreg(addr)
-    value_new = (value_old & ~mask) | (value & mask)
+    #value_new = (value_old & ~mask) | (value & mask)
     wreg(addr, value)
 
 ####################################################################################################
@@ -2044,7 +2044,7 @@ def rregBits(addr, bits, lane = None):
     '''
     read from a register field
     '''
-    if lane==None: lane=gLane[0]
+    if lane is None: lane=gLane[0]
     addr = [addr, bits]
     return rreg(addr, lane)
 
@@ -2055,7 +2055,7 @@ def rregBits(addr, bits, lane = None):
 def load_setup(filename = None):
 
     global gSetupFileName
-    if filename==None:
+    if filename is None:
         filename=gSetupFileName # Use the same filename used last time save_setup() was called.
 
     try:
@@ -2084,14 +2084,14 @@ def save_setup(filename = None, lane=None):
     global gSetupFileName
     global gChipName
 
-    if lane==None: 
+    if lane is None: 
         lanes = range(0,len(lane_name_list)) # Save all lanes' settings by default
     else:
         lanes = get_lane_list(lane)
   
     try:
         f=open(filename, 'r')
-        script = f.read()
+        #script = f.read()
         f.close()
         print ("\n*** A file with the same name already exists. Choose another file name!  <<<<"),
         return
@@ -2104,7 +2104,7 @@ def save_setup(filename = None, lane=None):
         lanes_str='_Device%d_Lanes%d-%d_%s_' %(gSlice,lanes[0],lanes[-1],gEncodingMode[gSlice][lanes[0]][0].upper())
 
     timestr = time.strftime("%Y%m%d_%H%M%S")
-    if filename == None:
+    if filename is None:
         filename = gChipName + lanes_str + timestr + '.txt'
     gSetupFileName=filename
     log = open(filename, 'w')
@@ -2205,8 +2205,8 @@ def reg_group_dump_debug_mode(base_addr_range, lane_addr_range, addr_name, filen
         sys.stdout = log_file
 
     separator='\n-----'
-    for lane_base_addr in base_addr_range:
-        separator += '------'
+    # for lane_base_addr in base_addr_range:
+        # separator += '------'
         
     ### header
     print('\n %s   (Addr: 0x%04X to 0x%04X)' % (addr_name, base_addr_range[0], base_addr_range[-1]+lane_addr_range[-1]) ),
@@ -2215,8 +2215,8 @@ def reg_group_dump_debug_mode(base_addr_range, lane_addr_range, addr_name, filen
     for lane in lane_name_list:
         print("%4s " % (lane)),   
     print("\nAddr:"),
-    for lane_base_addr in base_addr_range:
-        print("%04X " % (lane_base_addr)),
+    # for lane_base_addr in base_addr_range:
+        # print("%04X " % (lane_base_addr)),
     print('%s'%separator),
     
     ### Data
@@ -2257,7 +2257,7 @@ def save_setup_debug_mode(filename = None):
     global gChipName
 
     timestr = time.strftime("%Y%m%d_%H%M%S")
-    if filename == None:
+    if filename is None:
         filename = gChipName + '_Reg_Setup_Debug_Mode' + timestr + '.txt'
     log = open(filename, 'w')
     log.write('\n----------------------------------------------------------------------'),
@@ -2347,7 +2347,7 @@ def soft_reset():
     wreg(Pam4Reg.chip_rst_addr, 0x0)
 
 def logic_reset(lane=None):
-    if lane==None: # Logic reset the whole slice
+    if lane is None: # Logic reset the whole slice
         wreg(Pam4Reg.chip_rst_addr, Pam4Reg.chip_logic_rst_val)
         wreg(Pam4Reg.chip_rst_addr, 0x0)
     else: # Logic reset selected lane(s) only
@@ -2388,7 +2388,7 @@ def fw_load_file_init (file_name=None, path_name=None):
     file_name_prefix_rev_1 = 'BE.fw.'
     file_name_prefix_rev_2 = 'BE2.fw.'
     file_name_extension = '.bin'    
-    if file_name==None:
+    if file_name is None:
         try:
             gFwFileName
         except NameError:
@@ -2434,7 +2434,7 @@ def fw_load_broadcast_mode (mode='on'):
            
 ####################################################################################################
 def fw_load_main (fw_file_name=None,broadcast_mode='OFF',wait=0.001):
-    print_en=0
+    # print_en=0
 
     ##### FW Download Register addresses
     FW0 = 0x9F00
@@ -2445,7 +2445,7 @@ def fw_load_main (fw_file_name=None,broadcast_mode='OFF',wait=0.001):
     fw_file_ptr = open(fw_file_name, 'rb')
     fw_data = fw_file_ptr.read()
     start = 4096
-    file_hash_code = struct.unpack_from('>I', fw_data[start   :start+4 ])[0]
+    # file_hash_code = struct.unpack_from('>I', fw_data[start   :start+4 ])[0]
     file_crc_code  = struct.unpack_from('>H', fw_data[start+4 :start+6 ])[0]
     file_date_code = struct.unpack_from('>H', fw_data[start+6 :start+8 ])[0]
     entryPoint     = struct.unpack_from('>I', fw_data[start+8 :start+12])[0]
@@ -2453,14 +2453,14 @@ def fw_load_main (fw_file_name=None,broadcast_mode='OFF',wait=0.001):
     ramAddr        = struct.unpack_from('>I', fw_data[start+16:start+20])[0]
     data           = fw_data[start+20:]
 
-    d=datetime.date(1970, 1, 1) + datetime.timedelta(file_date_code)
+    # d=datetime.date(1970, 1, 1) + datetime.timedelta(file_date_code)
 
-    if print_en: print ("fw_load Hash Code : 0x%06x" % file_hash_code)
-    if print_en: print ("fw_load Date Code : 0x%02x (%04d-%02d-%02d)" % (file_date_code, d.year, d.month, d.day))
-    if print_en: print ("fw_load  CRC Code : 0x%04x" % file_crc_code)
-    if print_en: print ("fw_load    Length : %d" % length)
-    if print_en: print ("fw_load     Entry : 0x%08x" % entryPoint)
-    if print_en: print ("fw_load       RAM : 0x%08x" % ramAddr)
+    # if print_en: print ("fw_load Hash Code : 0x%06x" % file_hash_code)
+    # if print_en: print ("fw_load Date Code : 0x%02x (%04d-%02d-%02d)" % (file_date_code, d.year, d.month, d.day))
+    # if print_en: print ("fw_load  CRC Code : 0x%04x" % file_crc_code)
+    # if print_en: print ("fw_load    Length : %d" % length)
+    # if print_en: print ("fw_load     Entry : 0x%08x" % entryPoint)
+    # if print_en: print ("fw_load       RAM : 0x%08x" % ramAddr)
 
     dataPtr = 0
     sections = (length+23)/24
@@ -2473,7 +2473,7 @@ def fw_load_main (fw_file_name=None,broadcast_mode='OFF',wait=0.001):
     if broadcast_mode.upper()=='ON': # broadcast download mode, use fixed delay
         time.sleep(.01)              
     else:                # single-slice download mode, status read back
-        start_time=time.time()
+        #start_time=time.time()
         checkTime = 0
         status = rreg(FW2)
         while status != 0:
@@ -2482,7 +2482,7 @@ def fw_load_main (fw_file_name=None,broadcast_mode='OFF',wait=0.001):
             if checkTime > 100000:
                 print ('\n...FW LOAD ERROR: : Wait for FW2=0 Timed Out! FW2 = 0x%X'% status) #Wait for FW2=0: 0.000432 sec
                 break
-        stop_time=time.time()    
+        #stop_time=time.time()    
     wreg(FW2, 0x0000)
     ##### FW Unload Done
     
@@ -2523,7 +2523,7 @@ def fw_load_main (fw_file_name=None,broadcast_mode='OFF',wait=0.001):
                     break
                     
             if checkTime>0:
-                if print_en: print ('\nfw_load: section %d, CheckTime= %d' % (i, checkTime))
+                #if print_en: print ('\nfw_load: section %d, CheckTime= %d' % (i, checkTime))
 
             if status != 0:
                 print("\n...FW LOAD ERROR: Invalid Write to RAM, section %d, Status %d"%(i,status))
@@ -2905,7 +2905,7 @@ def fw_magic(print_en=1):
     else:
         if print_en==1: print("\n...FW Magic Word : 0x%04X (INVALID!!! Expected: 0x%04X)\n" % (magic_word, Pam4Reg.fw_load_magic_word)),
         return 0
-    return magic_word
+    #return magic_word
 ####################################################################################################
 # This function reads SerDes Chips Revision version number for the FW already loaded in Serdes
 # 
@@ -2977,7 +2977,7 @@ def fw_hash(print_en=1):
     while(rreg(Pam4Reg.fw_hash_read_en_addr)& Pam4Reg.fw_hash_read_status != Pam4Reg.fw_hash_read_status):
         cnt+=1
         if (cnt > 100):    break
-        pass
+        #pass
     high_word = rreg(Pam4Reg.fw_hash_word_hi_addr) # upper byte
     low_word  = rreg(Pam4Reg.fw_hash_word_lo_addr) # lower word
     hash_code = (high_word <<16) + low_word
@@ -3098,7 +3098,7 @@ def fw_unload(print_en=1,slice=None):
         fw_unload_status = rreg(Pam4Reg.fw_unload_addr) # Read and check to make sure Boot ROM register is cleared after cpu reset
         if fw_unload_status != 0:
             if print_en: print("\n*** Slice %d FW Unload FAILED or CPU Not Running!  ***"%slc)
-            result = False
+            #result = False
         else:        
             for ln in range(len(lane_name_list)):
                 for core in [Pam4Reg, NrzReg]:
@@ -3128,7 +3128,7 @@ def fw_cmd(cmd):
 def fw_debug_info(section=2, index=2,lane=None):
     lanes = get_lane_list(lane)
     result = {}
-    timeout=0.2 
+    #timeout=0.2 
     for ln in lanes:
         result[ln] = fw_debug_cmd(section, index, ln)
         
@@ -3138,17 +3138,17 @@ def fw_debug_info(section=2, index=2,lane=None):
 ####################################################################################################
 def fw_debug(section=None, index=None,lane=None):
 
-    if section==None:         sections=[2]
+    if section is None:         sections=[2]
     if type(section)==int:    sections=[section]
     elif type(section)==list: sections=section
     
-    if index==None:           indices=[2]
+    if index is None:           indices=[2]
     if type(index)==int:      indices=[index]
     elif type(index)==list:   indices=index
     
     lanes = get_lane_list(lane)
     result = {}
-    timeout=0.2 
+    #timeout=0.2 
     for sec in sections:
         for idx in indices:
             for ln in lanes:
@@ -3159,7 +3159,7 @@ def fw_debug(section=None, index=None,lane=None):
 # Get FW Debug Information
 ####################################################################################################
 def fw_debug_cmd(section=2, index=7, lane=0):
-    timeout=0.2
+    #timeout=0.2
     result=0    
     cmd = 0xB000 + ((section&0xf)<<4) + lane
     wreg(c.fw_cmd_detail_addr, index,lane) # fw_cmd_detail_addr = 0x9807
@@ -3281,14 +3281,14 @@ def hw_lane_reset_no_fw(lane=None):
 def lane_reset (lane=None):
 
     if (not fw_loaded(print_en=0)) or (fw_reg_rd(128)==0):  # FW not loaded or loaded but halted
-        lane_reset_method = 'sw_manage_lane_reset_with_no_fw'
+        #lane_reset_method = 'sw_manage_lane_reset_with_no_fw'
         hw_lane_reset_no_fw(lane=lane)
     else:                                                   # FW loaded and running
         if fw_date(print_en=0)<18268:                       # FW Date is older than 2020-01-07
-            lane_reset_method = 'sw_manage_lane_reset_with_fw'
+            #lane_reset_method = 'sw_manage_lane_reset_with_fw'
             hw_lane_reset (lane=lane)
         else:                                               # FW Date is on or after 2020-01-07
-            lane_reset_method = 'fw_manage_lane_reset_fw_fully'
+            l#ane_reset_method = 'fw_manage_lane_reset_fw_fully'
             fw_lane_reset (lane=lane)  
     
 ####################################################################################################
@@ -3347,12 +3347,12 @@ def fw_lane_mode (lane=None):
     lanes = get_lane_list(lane)
     result = {}
     # print current fw_modes of the lanes
-    dbg_mode=0
-    dbg_cmd=c.fw_debug_info_cmd # 0xb000
+    #dbg_mode=0
+    #dbg_cmd=c.fw_debug_info_cmd # 0xb000
     mode_list=['OFF','NRZ','PAM4']
     mode_idx=[0,1]
     opt_status_list=['-','OPT']
-    opt_status_bit=[0,1]
+    #opt_status_bit=[0,1]
   
     for ln in lanes:
         for idx in range(2): # get both fw modes [0]:set_mode [1]: opt_mode
@@ -3602,10 +3602,10 @@ def fw_gearbox_wait (max_wait=2000, print_en=0):
         gb_state12 = fw_debug_cmd(section=3,index=0, lane=12)
         
         if print_en: 
-            tx_output_a0 = hex(rreg(0xa0, 0))
-            tx_output_a2 = hex(rreg(0xa0, 2))
-            tx_output_b0 = hex(rreg(0xa0, 8))
-            tx_output_b4 = hex(rreg(0xa0,12))
+            # tx_output_a0 = hex(rreg(0xa0, 0))
+            # tx_output_a2 = hex(rreg(0xa0, 2))
+            # tx_output_b0 = hex(rreg(0xa0, 8))
+            # tx_output_b4 = hex(rreg(0xa0,12))
             fec_stat, fec_counts = fec_status(print_en=0)
             adapt_stat = hex(rreg(0x98c9))
             reg1=hex(rreg(0x4880));reg2=hex(rreg(0x4a80));reg3=hex(rreg(0x5880));reg4=hex(rreg(0x5a80))
@@ -3644,7 +3644,7 @@ def fw_gearbox_wait_orig (max_wait=None, lane=None, print_en=1):
     adapt_done_lane_prev = [0]*16
     adapt_done_lane_curr = [0]*16
     
-    if max_wait==None:
+    if max_wait is None:
         maxWait = 30
     else:
         maxWait = max_wait
@@ -3704,7 +3704,7 @@ def fw_config_wait (max_wait=None, lane=None, print_en=1):
     config_done_this_lane = [0]*16
     config_done_all_lanes=0
     
-    if max_wait==None:
+    if max_wait is None:
         maxWait = 3.0
         # if any of the lanes is PAM4 mode, set the max wait to 20 seconds, otherwise 3 seconds max 
         for ln in lanes:
@@ -3754,7 +3754,7 @@ def fw_adapt_wait (max_wait=None, lane=None, print_en=1):
     adapt_done_lane_prev = [0]*16
     adapt_done_lane_curr = [0]*16
     
-    if max_wait==None:
+    if max_wait is None:
         maxWait = 3.0
         # if any of the lanes is PAM4 mode, set the max wait to 20 seconds, otherwise 3 seconds max 
         for ln in lanes:
@@ -3833,10 +3833,10 @@ def fw_bitmux_wait (lane=[0,1,2,3], max_wait=None, print_en=1):
     bitmux_done_lane_prev = [0]*16
     bitmux_state_lane_curr = [0]*16
     bitmux_done_lane_curr = [0]*16
-    adapt_done_lane_prev = [0]*16
+    #adapt_done_lane_prev = [0]*16
     adapt_done_lane_curr = [0]*16
     
-    if max_wait==None:
+    if max_wait is None:
         maxWait = 10.0
     else:
         maxWait = max_wait
@@ -4026,7 +4026,7 @@ def fw_reg_wr(addr, data):
 def fw_reg(addr=None, data=None, print_en=1):
     
     
-    if addr==None:
+    if addr is None:
         addr_list=range(201)    # read all FW registers
         data=None               # Make sure not to write more than one address at a time. Just read FW registers and exit!
     elif type(addr)==int:       
@@ -4099,7 +4099,7 @@ def fw_config_lane (mode=None, datarate=None, lane=None):
     speed_str_list =['10','20','25','26','28','51','50','53','56'] # speed as part of mode argument
     speed_code_list=[0x11,0x22,0x33,0x44,0x55,0x88,0x99,0x99,0xAA] # speed codes to be written to 0x9807[7:0]
     
-    if mode==None: # no arguments? then just print current fw_modes of the lanes and exit
+    if mode is None: # no arguments? then just print current fw_modes of the lanes and exit
         print ("")
         for ln in lanes:
             print(" %4s" %(lane_name_list[ln])),
@@ -4384,7 +4384,7 @@ def fw_config_gearbox_50G(A_lanes=[0,1,2,3], fec_b_byp=False):
     #fec_status()
 ####################################################################################################
 def watch(function,*args):
-    import os
+    #import os
     os.system('cls' if os.name == 'nt' else 'clear')
     try:
         while True:            
@@ -4445,7 +4445,7 @@ def Gray_Bin(gg=0): # up to 7-bit Gray Number
 def pol (tx_pol=None, rx_pol=None, lane=None, print_en=1):
 
     lanes = get_lane_list(lane)    
-    Slice=gSlice
+    #Slice=gSlice
     #get_lane_mode('all')
     result={}
            
@@ -4490,14 +4490,14 @@ def gc (tx_gc=None, rx_gc=None, lane=None, print_en=None):
         if gEncodingMode[gSlice][ln][0] == 'nrz': c=NrzReg
         else:                           c=Pam4Reg
 
-        if (tx_gc!=None and rx_gc==None):
+        if (tx_gc!=None and rx_gc is None):
             wreg(c.tx_gray_en_addr, tx_gc,ln)
             if gEncodingMode[gSlice][ln][0] == 'pam4': wreg(c.rx_gray_en_addr, tx_gc,ln)
         elif (tx_gc!=None and rx_gc!=None):
             wreg(c.tx_gray_en_addr, tx_gc,ln)
             if gEncodingMode[gSlice][ln][0] == 'pam4': wreg(c.rx_gray_en_addr, rx_gc,ln)
         else:
-            if print_en==None: print_en=1 # if no arguments, readout the current polarity settings
+            if print_en is None: print_en=1 # if no arguments, readout the current polarity settings
 
         tx_gc_this_lane= rreg(c.tx_gray_en_addr,ln)
         if gEncodingMode[gSlice][ln][0] == 'pam4': rx_gc_this_lane= rreg(c.rx_gray_en_addr,ln)
@@ -4518,14 +4518,14 @@ def pc (tx_pc=None, rx_pc=None, lane=None, print_en=None):
         if gEncodingMode[gSlice][ln][0] == 'nrz': c=NrzReg
         else:                           c=Pam4Reg
 
-        if (tx_pc!=None and rx_pc==None):
+        if (tx_pc!=None and rx_pc is None):
             wreg(c.tx_precoder_en_addr, tx_pc,ln)
             if gEncodingMode[gSlice][ln][0] == 'pam4': wreg(c.rx_precoder_en_addr, tx_pc,ln)
         elif (tx_pc!=None and rx_pc!=None):
             wreg(c.tx_precoder_en_addr, tx_pc,ln)
             if gEncodingMode[gSlice][ln][0] == 'pam4': wreg(c.rx_precoder_en_addr, rx_pc,ln)
         else:
-            if print_en==None: print_en=1 # if no arguments, readout the current polarity settings
+            if print_en is None: print_en=1 # if no arguments, readout the current polarity settings
 
         tx_pc_this_lane= rreg(c.tx_precoder_en_addr,ln)
         if gEncodingMode[gSlice][ln][0] == 'pam4': rx_pc_this_lane= rreg(c.rx_precoder_en_addr,ln)
@@ -4538,7 +4538,7 @@ def msblsb (tx_msblsb=None, rx_msblsb=None, lane=None, print_en=None):
 
     lanes = get_lane_list(lane)
 
-    Slice=gSlice
+    #Slice=gSlice
     #get_lane_mode('all')
     
     for ln in lanes:
@@ -4546,14 +4546,14 @@ def msblsb (tx_msblsb=None, rx_msblsb=None, lane=None, print_en=None):
         if gEncodingMode[gSlice][ln][0] == 'nrz': c=NrzReg
         else:                           c=Pam4Reg
 
-        if (tx_msblsb!=None and rx_msblsb==None):
+        if (tx_msblsb!=None and rx_msblsb is None):
             wreg(c.tx_msb_swap_addr, tx_msblsb,ln)
             if gEncodingMode[gSlice][ln][0] == 'pam4': wreg(c.rx_msb_swap_addr, tx_msblsb,ln)
         elif (tx_msblsb!=None and rx_msblsb!=None):
             wreg(c.tx_msb_swap_addr, tx_msblsb,ln)
             if gEncodingMode[gSlice][ln][0] == 'pam4': wreg(c.rx_msb_swap_addr, rx_msblsb,ln)
         else:
-            if print_en==None: print_en=1 # if no arguments, readout the current polarity settings
+            if print_en is None: print_en=1 # if no arguments, readout the current polarity settings
 
         tx_msblsb_this_lane= rreg(c.tx_msb_swap_addr,ln)
         if gEncodingMode[gSlice][ln][0] == 'pam4': rx_msblsb_this_lane= rreg(c.rx_msb_swap_addr,ln)
@@ -4655,13 +4655,13 @@ def pll_cap (tx_cap=None, rx_cap=None, lane=None, print_en=1):
 #################################################################### 
 def pll_cal_top0( side = 'A'):
     window=0x3fff
-    toppll_lock = 0
+    #toppll_lock = 0
     if side.upper() == 'A':
         Base_addr = 0x9500
     else:
         Base_addr = 0x9600
-    out = 0
-    inside = 0
+    # out = 0
+    # inside = 0
     f2 = open('pll_cal_top_log.txt','w')
     wregBits(Base_addr + 0x01,[12,6],0,16)
     wregBits(Base_addr + 0x0D,[14,0],window,16)
@@ -4678,7 +4678,7 @@ def pll_cal_top0( side = 'A'):
         if(abs(readout-setting) > 2):  
             if (vcocap == 0x7f):
                 vcocap_min = 0
-                toppll_lock = 1
+                #toppll_lock = 1
                 print >> f2, "The frequency setting is out of pll list(range(min))"
                 break
             else:
@@ -4704,7 +4704,7 @@ def pll_cal_top0( side = 'A'):
         if(abs(readout-window) > 2):
             if (vcocap == 0x0):
                 vcocap_max = 0
-                toppll_lock = 1
+                #toppll_lock = 1
                 print >> f2, "The frequency setting is out of pll list(range(max))"
                 break
             else:
@@ -4739,15 +4739,15 @@ def pll_cal_top0( side = 'A'):
 #################################################################### 
 def pll_cal_top1(tgt_pll=None, lane=None, print_en=1):
     
-    if tgt_pll==None: tgt_pll='both' # set both top PLLs, A and B
+    if tgt_pll is None: tgt_pll='both' # set both top PLLs, A and B
     pll_list=['A','B'] if tgt_pll=='both' else tgt_pll.upper()
 
     result = {}
     pll_cal_result=[[1,2,3],[4,5,6]] # TX_PLL[vcocap_min,new_vcocap,vcocap_max], RX_PLL[vcocap_min,new_vcocap,vcocap_max],
     log_en=1
     window=0x2000
-    out = 0
-    inside = 0
+    # out = 0
+    # inside = 0
     
     if(log_en): f2 = open('pll_cal_TOP_log.txt','w')
     if print_en: print("\n     -- Top PLL Cap --",)
@@ -4962,7 +4962,7 @@ def pll_cal_top2(lane=0, window=0x3fff, openLoop=False, scanAll=None, dir_down=F
         print("lane %d, up, %3d, %04x, %04x" % (lane, vco, window, readout))
         if abs(readout-window)>2:
             if (vco==0x7f):
-                vco_min = 0
+                # vco_min = 0
                 print("top pll scan up no lock")
                 return
             else:
@@ -5010,19 +5010,19 @@ def pll_cal_top2(lane=0, window=0x3fff, openLoop=False, scanAll=None, dir_down=F
 #################################################################################################### 
 def pll_cal(tgt_pll=None, lane=None, print_en=1):
 
-    if tgt_pll==None: tgt_pll='both' # set both PLLs with datarate passed
+    if tgt_pll is None: tgt_pll='both' # set both PLLs with datarate passed
     pll_list=['tx','rx'] if tgt_pll=='both' else tgt_pll
 
     lanes = get_lane_list(lane)
     result = {}
     pll_cal_result=[[1,2,3],[4,5,6]] # TX_PLL[vcocap_min,new_vcocap,vcocap_max], RX_PLL[vcocap_min,new_vcocap,vcocap_max],
-    log_en=0
+    #log_en=0
     window=0x2000
-    out = 0
-    inside = 0
+    # out = 0
+    # inside = 0
     rx_lock = 0
        
-    if(log_en): f2 = open('pll_cal_log.txt','w')
+    #if(log_en): f2 = open('pll_cal_log.txt','w')
     if print_en: print ("\n    --- TX PLL Cap ---  --- RX PLL Cap ---")
     if print_en: print ("\nLn, Min, Old/New, Max,  Min, Old/New, Max")
 
@@ -5050,7 +5050,7 @@ def pll_cal(tgt_pll=None, lane=None, print_en=1):
                 fcal_done_addr   = [0x1E8,  [15]]
 
             
-            if(log_en): print >> f2, "Lane,Dir, Cap, Target, ReadOut"          
+            #if(log_en): print >> f2, "Lane,Dir, Cap, Target, ReadOut"          
             orig_vcocap = rreg(vcocap_addr,ln)  # original cap value
 
             ### Sweep upward and find min vcocap
@@ -5067,12 +5067,12 @@ def pll_cal(tgt_pll=None, lane=None, print_en=1):
                     pass
                 readout = rreg(fcal_cnt_op_addr,ln)  # read out the counter value(fcal_cnt_op[15:0]).
                 vcocap = rreg(vcocap_addr,ln)
-                if(log_en): print >> f2, "%4d, Up, %3d,    %04X,   %04X"%(ln, vcocap,target_cnt,readout)
+                #if(log_en): print >> f2, "%4d, Up, %3d,    %04X,   %04X"%(ln, vcocap,target_cnt,readout)
                 if(abs(readout-target_cnt) > 2):  
                     if (vcocap == 0x7f):
                         vcocap_min = 0
                         rx_lock = 1
-                        if(log_en): print >> f2, "Lane %d,  UP: The frequency target_cnt is out of pll range(min)"%ln
+                        #if(log_en): print >> f2, "Lane %d,  UP: The frequency target_cnt is out of pll range(min)"%ln
                         break
                     else:
                         vcocap = rreg(vcocap_addr,ln) + 0x1
@@ -5097,13 +5097,13 @@ def pll_cal(tgt_pll=None, lane=None, print_en=1):
 
                 readout = rreg(fcal_cnt_op_addr,ln)
                 vcocap = rreg(vcocap_addr,ln)
-                if(log_en): print >> f2, "%4d, Dn, %3d,    %04X,   %04X"%(ln, vcocap,target_cnt,readout)
+                #if(log_en): print >> f2, "%4d, Dn, %3d,    %04X,   %04X"%(ln, vcocap,target_cnt,readout)
 
                 if(abs(readout-target_cnt) > 2):
                     if (vcocap == 0x0):
                         vcocap_max = 0
                         rx_lock = 1
-                        if(log_en): print >> f2, "Lane %d,Down: The frequency target_cnt is out of pll range(max)"%ln
+                        #if(log_en): print >> f2, "Lane %d,Down: The frequency target_cnt is out of pll range(max)"%ln
                         break
                     else:
                         vcocap = rreg(vcocap_addr,ln) - 0x1
@@ -5127,7 +5127,7 @@ def pll_cal(tgt_pll=None, lane=None, print_en=1):
             pll_cal_result[index]=[vcocap_min,new_vcocap,vcocap_max]
             flag= '>' if orig_vcocap!=new_vcocap else ','
             if print_en: print ("%3d, %3d%s%3d, %3d, " % (vcocap_min,orig_vcocap,flag,new_vcocap,vcocap_max))
-            if(log_en): print ("\nLane %2d %s VCOCAPS: Min/Center(Orig)/Max: %2d / %2d(%2d) / %2d\n" % (ln,lane_pll,vcocap_min,new_vcocap,orig_vcocap,vcocap_max),file=f2)
+            #if(log_en): print ("\nLane %2d %s VCOCAPS: Min/Center(Orig)/Max: %2d / %2d(%2d) / %2d\n" % (ln,lane_pll,vcocap_min,new_vcocap,orig_vcocap,vcocap_max),file=f2)
             
             ### Disable TX or RX PLL CAL circuit after done with this Lane's PLL
             wreg(fcal_lo_open_addr, 0,ln)
@@ -5140,7 +5140,7 @@ def pll_cal(tgt_pll=None, lane=None, print_en=1):
         #### End of this lane
     
     if print_en: print ("\n")
-    if(log_en): f2.close()
+    #if(log_en): f2.close()
     if print_en==0: return result
 
 ####################################################################################################
@@ -5153,8 +5153,8 @@ def pll_cal(tgt_pll=None, lane=None, print_en=1):
 #################################################################################################### 
 def set_lane_pll (tgt_pll=None, datarate=None, fvco=None, cap=None, n=None, div4=None, div2=None, refclk=None, frac_en=None, frac_n=None, lane=None):
 
-    if tgt_pll==None:
-        if datarate==None:
+    if tgt_pll is None:
+        if datarate is None:
             print(" \tEnter one or more of the following arguments:")
             print(" \tset_lane_pll(tgt_pll='both'/'rx'/'tx', datarate, fvco, cap, n, div4, div2, refclk, lane)")
             rn
@@ -5178,8 +5178,8 @@ def set_lane_pll (tgt_pll=None, datarate=None, fvco=None, cap=None, n=None, div4
         desired_pll = [0,1]
     
     # Temporary holders for each lane/pll
-    lane_datarate=[0,1]
-    lane_fvco    =[0,1]
+    # lane_datarate=[0,1]
+    # lane_fvco    =[0,1]
     lane_cap     =[0,1]
     lane_n       =[0,1]
     lane_div4    =[0,1]
@@ -5193,13 +5193,13 @@ def set_lane_pll (tgt_pll=None, datarate=None, fvco=None, cap=None, n=None, div4
         get_lane_mode(ln)
         #### Do this per PLL (TXPLL and/or RXPLL) of each lane
         for pll in desired_pll:
-            lane_cap   [pll] = pll_params[ln][pll][2] if    cap == None else     cap
-            lane_n     [pll] = pll_params[ln][pll][3] if      n == None else       n
-            lane_div4  [pll] = pll_params[ln][pll][4] if   div4 == None else    div4
-            lane_div2  [pll] = pll_params[ln][pll][5] if   div2 == None else    div2
-            lane_refclk[pll] = pll_params[ln][pll][6] if refclk == None else  refclk
-            lane_frac_n[pll] = pll_params[ln][pll][7] if frac_n == None else  frac_n
-            lane_frac_en[pll]= pll_params[ln][pll][8] if frac_en== None else  frac_en
+            lane_cap   [pll] = pll_params[ln][pll][2] if    cap  is  None else     cap
+            lane_n     [pll] = pll_params[ln][pll][3] if      n  is  None else       n
+            lane_div4  [pll] = pll_params[ln][pll][4] if   div4  is  None else    div4
+            lane_div2  [pll] = pll_params[ln][pll][5] if   div2  is  None else    div2
+            lane_refclk[pll] = pll_params[ln][pll][6] if refclk  is  None else  refclk
+            lane_frac_n[pll] = pll_params[ln][pll][7] if frac_n  is  None else  frac_n
+            lane_frac_en[pll]= pll_params[ln][pll][8] if frac_en is  None else  frac_en
 
             ####### Calculate 'desired_n' per lane per pll (only if Data Rate or Fvco is passed)
             if datarate != None or fvco != None:
@@ -5298,7 +5298,7 @@ def get_lane_pll (lane=None):
             tx_pll_frac_n_hi = rreg([0x0d9,[3,0]],         ln) # Fractional_PLL_N[19:16]
             tx_pll_frac_n_lo = rreg(c.tx_pll_frac_n_addr,  ln) # Fractional_PLL_N[15:0]
             tx_pll_frac_n = (tx_pll_frac_n_hi << 16) + tx_pll_frac_n_lo
-        tx_pll_frac_order = rreg(c.tx_pll_frac_order_addr, ln) # Fractional_PLL_ORDER
+        #tx_pll_frac_order = rreg(c.tx_pll_frac_order_addr, ln) # Fractional_PLL_ORDER
         tx_pll_frac_en    = rreg(c.tx_pll_frac_en_addr,    ln) # Fractional_PLL_EN
         
         rx_div4_en        = rreg(c.rx_pll_div4_addr,       ln)
@@ -5307,7 +5307,7 @@ def get_lane_pll (lane=None):
         rx_pll_cap        = rreg(c.rx_pll_lvcocap_addr,    ln)
        #rx_10g_mode_en    = rreg(c.rx_mode10g_addr,        ln) # checking TX 10G is enough
         rx_pll_frac_n     = rreg(c.rx_pll_frac_n_addr,     ln) # Fractional_PLL_N
-        rx_pll_frac_order = rreg(c.rx_pll_frac_order_addr, ln) # Fractional_PLL_ORDER
+        #rx_pll_frac_order = rreg(c.rx_pll_frac_order_addr, ln) # Fractional_PLL_ORDER
         rx_pll_frac_en    = rreg(c.rx_pll_frac_en_addr,    ln) # Fractional_PLL_EN
         
         tx_div_by_4 = 1.0 if tx_div4_en==0     else 4.0
@@ -5415,8 +5415,8 @@ def eye(lane = None):
                         diff = plus_margin - minus_margin
                         if ( diff < result1):
                             result1 = diff
-                        else:
-                            result1 = result1
+                        # else:
+                            # result1 = result1
                     eye_margin.append((result1))
                     em[eye_index] = (float(eye_margin[eye_index])/2048.0) * (x + (50.0 * float(dac_val)))
         ##### NRZ EYE
@@ -5447,32 +5447,32 @@ def sw_eye(lane = None):
             ####### FW-based Eye margin
             # if FW is loaded and the Background FW is not paused
             # if fw_loaded and fw_pause(print_en=0)[0][2] == 1:
-            if False:# fw_loaded and fw_reg_rd(128)!=0:
-                print ("FW EYE MARGIN Lane %d"%ln)
-                fw_debug_cmd(section=10, index=5, lane=ln)
-                em = [rreg(0x9f00+eye_index) for eye_index in range(3)]
-            ####### SW-based Eye margin. Direct access to HW registers
-            else:
-                dac_val = dac(lane=ln)[ln]
-                for eye_index in range (0,3):
-                    result1 = 0xffff
-                    for y in range (0,4):
-                        sel = 3 * y + eye_index
-                        wreg(c.rx_plus_margin_sel_addr, sel, ln)
-                        plus_margin = rreg(c.rx_plus_margin_addr, ln)
-                        if (plus_margin > 0x7ff):
-                            plus_margin = plus_margin - 0x1000
-                        wreg(c.rx_minus_margin_sel_addr, sel, ln)
-                        minus_margin = (rreg(c.rx_minus_margin_addr, ln))
-                        if (minus_margin > 0x7ff):
-                            minus_margin = minus_margin - 0x1000
-                        diff = plus_margin - minus_margin
-                        if ( diff < result1):
-                            result1 = diff
-                        else:
-                            result1 = result1
-                    eye_margin.append((result1))
-                    em[eye_index] = (float(eye_margin[eye_index])/2048.0) * (x + (50.0 * float(dac_val)))
+            # if False:# fw_loaded and fw_reg_rd(128)!=0:
+                # print ("FW EYE MARGIN Lane %d"%ln)
+                # fw_debug_cmd(section=10, index=5, lane=ln)
+                # em = [rreg(0x9f00+eye_index) for eye_index in range(3)]
+            # ####### SW-based Eye margin. Direct access to HW registers
+            # else:
+            dac_val = dac(lane=ln)[ln]
+            for eye_index in range (0,3):
+                result1 = 0xffff
+                for y in range (0,4):
+                    sel = 3 * y + eye_index
+                    wreg(c.rx_plus_margin_sel_addr, sel, ln)
+                    plus_margin = rreg(c.rx_plus_margin_addr, ln)
+                    if (plus_margin > 0x7ff):
+                        plus_margin = plus_margin - 0x1000
+                    wreg(c.rx_minus_margin_sel_addr, sel, ln)
+                    minus_margin = (rreg(c.rx_minus_margin_addr, ln))
+                    if (minus_margin > 0x7ff):
+                        minus_margin = minus_margin - 0x1000
+                    diff = plus_margin - minus_margin
+                    if ( diff < result1):
+                        result1 = diff
+                    # else:
+                        # result1 = result1
+                eye_margin.append((result1))
+                em[eye_index] = (float(eye_margin[eye_index])/2048.0) * (x + (50.0 * float(dac_val)))
         ##### NRZ EYE
         elif line_encoding == 'nrz' and rdy == 3: 
             dac_val = dac(lane=ln)[ln]
@@ -5522,7 +5522,7 @@ def fw_eye(lane = None):
 ## PAM4 EYE Margin, by FW or by Python directly accessing HW registers
 ####################################################################################################
 def eye_pam4(lane=None):
-    c = Pam4Reg
+    #c = Pam4Reg
     #c.rx_plus_margin_sel_addr  = [0x88,[15,12]]
     #c.rx_minus_margin_sel_addr = [0x88,[11,8]]
     #c.rx_plus_margin_addr = [0x32,[15,4]]
@@ -5568,8 +5568,8 @@ def eye_pam4(lane=None):
                         diff = plus_margin - minus_margin
                         if ( diff < result1):
                             result1 = diff
-                        else:
-                            result1 = result1
+                        # else:
+                            # result1 = result1
                         #result1 = result1 + diff
                     eye_margin.append((result1))
                 em0 = (float(eye_margin[0])/2048.0) * (x + (50.0 * float(dac_val)))
@@ -5619,7 +5619,7 @@ def get_prbs(lane = None, rst=0, print_en=1):
 ####################################################################################################
 def flip_pol(lane=None, port='rx', print_en=1):
 
-    if lane==None and (type(lane)!=int or type(lane)!=list):
+    if lane is None and (type(lane)!=int or type(lane)!=list):
         print("\n   ...Usage.................................................................")
         print("\n      flip_pol (lane=0)            # flip RX polarity of lane 0"),
         print("\n      flip_pol (lane=0, port='rx') # flip RX polarity of lane 0"),
@@ -5747,15 +5747,15 @@ def auto_pol(port='rx', tx_prbs='en', print_en=1):
     # Make sure both PRBS TX Generator and RX Checker are enabled and both are set to PRBS31
     for ln in lanes:
         get_lane_mode(ln)
-        c = Pam4Reg if lane_mode_list[ln].lower() == 'pam4' else NrzReg
+        #c = Pam4Reg if lane_mode_list[ln].lower() == 'pam4' else NrzReg
         
         tx_prbs_gen_en = rreg([0x0a0,[14]],ln) # NRZ/PAM4 mode, PRBS Gen clock en
-        rx_prbs_checker_en = rreg([0x043, [3]],ln) if c==Pam4Reg else rreg([0x161,[10]],ln) # PAM4 or NRZ mode, PRBS Sync Checker powered up
+        #rx_prbs_checker_en = rreg([0x043, [3]],ln) if c==Pam4Reg else rreg([0x161,[10]],ln) # PAM4 or NRZ mode, PRBS Sync Checker powered up
         if (tx_prbs =='en' and tx_prbs_gen_en==0): # or rx_prbs_checker_en==0:
             prbs_mode_select(lane=ln, prbs_mode='prbs')
     
     for ln in lanes:
-        c = Pam4Reg if lane_mode_list[ln].lower() == 'pam4' else NrzReg
+        #c = Pam4Reg if lane_mode_list[ln].lower() == 'pam4' else NrzReg
         
         if (tx_prbs =='en'): 
             prbs_mode_select(lane=ln, prbs_mode='prbs')
@@ -5820,7 +5820,7 @@ def auto_pol_fec(port='rx',lanes=range(0,16),print_en=1):
   
     for ln in lanes:
         get_lane_mode(ln)
-        c = Pam4Reg if lane_mode_list[ln].lower() == 'pam4' else NrzReg
+        #c = Pam4Reg if lane_mode_list[ln].lower() == 'pam4' else NrzReg
         if port.upper() != 'TX':
             ##read FEC Status and FIFO Counters for this gearbox
             overall_fec_stat, fec_statistics = fec_status(print_en=0)
@@ -5850,7 +5850,7 @@ def auto_pol_fec(port='rx',lanes=range(0,16),print_en=1):
         #else:
         #### 5 #### flip TX polarities if partner FEC is not locked        
         
-        orig_tx_pol,orig_rx_pol =  pol(tx_pol=None, rx_pol=None, lane=ln, print_en=0)
+        #orig_tx_pol,orig_rx_pol =  pol(tx_pol=None, rx_pol=None, lane=ln, print_en=0)
 
         if port.upper() != 'TX': # if asked to reverse RX Polarity (default selection)
             #pol(tx_pol= orig_tx_pol, rx_pol=~orig_rx_pol, lane=ln, print_en=0)
@@ -5895,7 +5895,7 @@ def rx_prbs_mode(patt = None, lane = None):
     result = {}
     for lane in lanes:
         c = Pam4Reg if lane_mode_list[lane].lower() == 'pam4' else NrzReg
-        if patt == None:
+        if patt is None:
             checker = rx_checker(lane=lane)[lane]
             patt_v = rreg(c.rx_prbs_mode_addr, lane)   
             if lane_mode_list[lane].lower() == 'pam4':
@@ -5910,19 +5910,19 @@ def rx_prbs_mode(patt = None, lane = None):
             val = pam4_prbs_pat.index(patt) if gPam4_En else nrz_prbs_pat.index(patt)
             rx_checker(1,lane)
             wreg(c.rx_prbs_mode_addr, val, lane)
-    else:
-        if result != {}: return result
+    # else:
+    if result != {}: return result
 def rx_checker(status = None, lane = None):
     lanes = get_lane_list(lane)
     result = {}
     for lane in lanes:
         c = Pam4Reg if lane_mode_list[lane].lower() == 'pam4' else NrzReg
-        if status == None:
+        if status is None:
             result[lane] = rreg(c.rx_prbs_checker_pu_addr, lane)
         else:
             wreg(c.rx_prbs_checker_pu_addr, status, lane)
-    else:
-        if result != {}: return result
+    # else:
+    if result != {}: return result
             
 #####################################################################################################
 # Command to Disable (Squelch) or Enable (Unsquelch) TX output
@@ -6020,7 +6020,7 @@ def tx_test_patt(en=None, lane = None, tx_test_patt4_val=0x0000,tx_test_patt3_va
     c = Pam4Reg
     result = {}
     for lane in lanes:
-        if en == None:
+        if en is None:
             prbs_en = rreg(c.tx_prbs_en_addr, lane)
             test_patt_en = rreg(c.tx_test_patt_en_addr, lane)
             prbs_clk_en = rreg(c.tx_prbs_clk_en_addr, lane)
@@ -6038,8 +6038,8 @@ def tx_test_patt(en=None, lane = None, tx_test_patt4_val=0x0000,tx_test_patt3_va
         else:
             # normal traffic mode
             wreg(c.tx_test_patt_en_addr, 0x0, lane)
-    else:
-        if result != {}: return result
+    # else:
+    if result != {}: return result
         
 ####################################################################################################
 def tx_prbs_en(en = None, lane = None):
@@ -6047,7 +6047,7 @@ def tx_prbs_en(en = None, lane = None):
     c = Pam4Reg
     result = {}
     for lane in lanes:
-        if en == None:
+        if en is None:
             prbs_en = rreg(c.tx_prbs_en_addr, lane)
             test_patt_en = rreg(c.tx_test_patt_en_addr, lane)
             prbs_clk_en = rreg(c.tx_prbs_clk_en_addr, lane)
@@ -6068,7 +6068,7 @@ def tx_prbs_mode(patt = None, lane = None):
     nrz_prbs_pat  = ['PRBS9', 'PRBS15', 'PRBS23', 'PRBS31'] 
     pam4_prbs_pat = ['PRBS9', 'PRBS13', 'PRBS15', 'PRBS31']
     for lane in lanes:
-        if patt == None:
+        if patt is None:
             prbs_en = rreg(c.tx_prbs_en_addr, lane)
             test_patt_en = rreg(c.tx_test_patt_en_addr, lane)
             prbs_clk_en = rreg(c.tx_prbs_clk_en_addr, lane)
@@ -6088,8 +6088,8 @@ def tx_prbs_mode(patt = None, lane = None):
             val = pam4_prbs_pat.index(patt) if lane_mode_list[lane].lower() == 'pam4' else nrz_prbs_pat.index(patt)
             wreg(c.tx_prbs_patt_sel_addr, val, lane)
             tx_prbs_en(1, lane)
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
         
 ####################################################################################################
 def err_inject(lane = None):
@@ -6108,7 +6108,7 @@ def tx_taps(tap1 = None,tap2 = None,tap3 = None, tap4 = None, tap5 = None, tap6 
     c = Pam4Reg
     result = {}
     for lane in lanes:
-        if tap1==tap2==tap3==tap4==tap5==tap6==tap7==tap8==tap9==tap10==tap11==None:
+        if tap1==tap2==tap3==tap4==tap5==tap6==tap7==tap8==tap9==tap10==tap11 is None:
             tap1_v = twos_to_int(rreg(c.tx_tap1_addr, lane), 8)
             tap2_v = twos_to_int(rreg(c.tx_tap2_addr, lane), 8)
             tap3_v = twos_to_int(rreg(c.tx_tap3_addr, lane), 8)
@@ -6133,8 +6133,8 @@ def tx_taps(tap1 = None,tap2 = None,tap3 = None, tap4 = None, tap5 = None, tap6 
             if tap9 != None: wreg(c.tx_tap9_addr, int_to_twos(tap9,4), lane)
             if tap10 != None: wreg(c.tx_tap10_addr, int_to_twos(tap10,4), lane)
             if tap11 != None: wreg(c.tx_tap11_addr, int_to_twos(tap11,4), lane)
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
     
 ####################################################################################################
 def tx_taps_rule_check(lane = None):
@@ -6147,8 +6147,8 @@ def tx_taps_rule_check(lane = None):
         hf = rreg(c.tx_taps_hf_addr, lane)
         tx_taps_sum = sum(taps)/2.0 + sum([taps[i]*((hf>>i)&1) for i in range(5)])/2.0
         result[lane] = (tx_taps_sum <= c.tx_taps_sum_limit), tx_taps_sum
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
 ####################################################################################################
 def tx(lane = None):
     lanes = get_lane_list(lane)
@@ -6253,7 +6253,7 @@ def bp1(en = None, st = 0, lane = None):
     result = {}
     for lane in lanes:
         c = Pam4Reg if lane_mode_list[lane].lower() == 'pam4' else NrzReg  
-        if en == None:
+        if en is None:
             en_v = rreg(c.rx_bp1_en_addr, lane)
             st_v = rreg(c.rx_bp1_st_addr, lane)
             reached = rreg(c.rx_bp1_reached_addr, lane)
@@ -6261,15 +6261,15 @@ def bp1(en = None, st = 0, lane = None):
         else:
             wreg(c.rx_bp1_st_addr, st, lane)
             wreg(c.rx_bp1_en_addr, en, lane)
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
         
 def bp2(en = None, st = 0, lane = None):
     lanes = get_lane_list(lane)
     result = {}
     for lane in lanes:
         c = Pam4Reg if lane_mode_list[lane].lower() == 'pam4' else NrzReg  
-        if en == None:
+        if en is None:
             en_v = rreg(c.rx_bp2_en_addr, lane)
             st_v = rreg(c.rx_bp2_st_addr, lane)
             reached = rreg(c.rx_bp2_reached_addr, lane)
@@ -6277,29 +6277,29 @@ def bp2(en = None, st = 0, lane = None):
         else:
             wreg(c.rx_bp2_st_addr, st, lane)
             wreg(c.rx_bp2_en_addr, en, lane)
-    else:
-        if result != {}: return result   
+    #else:
+    if result != {}: return result   
         
 def ctle(val = None, lane = None):
     lanes = get_lane_list(lane)
     result = {}
     for lane in lanes:
         c = Pam4Reg if lane_mode_list[lane].lower() == 'pam4' else NrzReg  
-        if val == None:
+        if val is None:
             v = rreg(c.rx_agc_ow_addr, lane)
             result[lane] = v
         else:
             wreg(c.rx_agc_ow_addr, val, lane)
             wreg(c.rx_agc_owen_addr, 0x1, lane)
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
         
 def ctle12 (ctle = None, ctle1 = None, ctle2 = None, lane = None):
     lanes = get_lane_list(lane)
     result = {}
     for ln in lanes:
         c = Pam4Reg if lane_mode_list[ln].lower() == 'pam4' else NrzReg  
-        if ctle == None: # Read current CTLE settings
+        if ctle is None: # Read current CTLE settings
             ctle_idx = rreg(c.rx_agc_ow_addr, lane)
             ctle_1_bit4=rreg([0x1d7,[3]],ln)
             ctle_2_bit4=rreg([0x1d7,[2]],ln)
@@ -6312,44 +6312,44 @@ def ctle12 (ctle = None, ctle1 = None, ctle2 = None, lane = None):
             # overwrite its CTLE1/2 values if given
             if ctle1 != None and ctle2 != None: 
                 if ctle1>7:
-                    ctle_1_w = ctle1 - 8
+                    ctle1_w = ctle1 - 8
                     wreg([0x1d7,[3]],1,ln)
                 else:
-                    ctle_1_w = ctle1
+                    ctle1_w = ctle1
                     wreg([0x1d7,[3]],0,ln)
             
                 if ctle2>7:
-                    ctle_2_w = ctle2 - 8
+                    ctle2_w = ctle2 - 8
                     wreg([0x1d7,[2]],1,ln)
                 else:
-                    ctle_2_w = ctle2
+                    ctle2_w = ctle2
                     wreg([0x1d7,[2]],0,ln)       
                 ctle_map(ctle, ctle1_w, ctle2_w, lane=ln)
 
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
 
 def skef(en = None, val = None, lane = None):
     lanes = get_lane_list(lane)
     result = {}
     c = Pam4Reg
     for lane in lanes:
-        if en == None:
+        if en is None:
             en_v = rreg(c.rx_skef_en_addr, lane)
             v = rreg(c.rx_skef_degen_addr, lane)
             result[lane] = en_v, v
         else:
             wreg(c.rx_skef_degen_addr, val, lane)
             wreg(c.rx_skef_en_addr, en, lane)
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
         
 def agcgain(agcgain1 = None, agcgain2 = None, lane = None):
     lanes = get_lane_list(lane)
     result = {}
     c = Pam4Reg
     for lane in lanes:
-        if agcgain1 == agcgain2 == None:
+        if agcgain1 == agcgain2 is None:
             agcgain1_v = Gray_Bin(rreg(c.rx_agcgain1_addr, lane))
             agcgain2_v = Gray_Bin(rreg(c.rx_agcgain2_addr, lane))
             result[lane] = agcgain1_v, agcgain2_v
@@ -6358,15 +6358,15 @@ def agcgain(agcgain1 = None, agcgain2 = None, lane = None):
                 wreg(c.rx_agcgain1_addr, Bin_Gray(agcgain1), lane)
             if agcgain2 != None:
                 wreg(c.rx_agcgain2_addr, Bin_Gray(agcgain2), lane)
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
         
 def ffegain(ffegain1 = None, ffegain2 = None, lane = None):
     lanes = get_lane_list(lane)
     result = {}
     c = Pam4Reg
     for lane in lanes:
-        if ffegain1 == ffegain2 == None:
+        if ffegain1 == ffegain2 is None:
             ffegain1_v = Gray_Bin(rreg(c.rx_ffe_sf_msb_addr, lane))
             ffegain2_v = Gray_Bin(rreg(c.rx_ffe_sf_lsb_addr, lane))
             result[lane] = ffegain1_v, ffegain2_v
@@ -6375,18 +6375,18 @@ def ffegain(ffegain1 = None, ffegain2 = None, lane = None):
                 wreg(c.rx_ffe_sf_msb_addr, Bin_Gray(ffegain1), lane)
             if ffegain2 != None:
                 wreg(c.rx_ffe_sf_lsb_addr, Bin_Gray(ffegain2), lane)
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
          
 def dc_gain(agcgain1=None, agcgain2=None, ffegain1=None, ffegain2=None, lane=None):    
-    if agcgain1 == agcgain2 == ffegain1 == ffegain2 == None:
+    if agcgain1 == agcgain2 == ffegain1 == ffegain2 is None:
         agcgain_val = agcgain(lane=lane)
         ffegain_val = ffegain(lane=lane)
         result = {}
         for i in agcgain_val.keys():
             result[i] = agcgain_val[i][0], agcgain_val[i][1], ffegain_val[i][0], ffegain_val[i][1]
-        else:
-            if result != {}: return result
+        #else:
+        if result != {}: return result
     else:
         if agcgain1 != None or agcgain2 != None:
             agcgain(agcgain1, agcgain2, lane)
@@ -6411,7 +6411,7 @@ def ctle_map(sel = None, val1 = None, val2 = None, lane = None):
                     6: [(map2>>9) & 0x7, (map2>>6) & 0x7],
                     7: [(map2>>3) & 0x7, map2 & 0x7]
                     }
-            if sel == None:
+            if sel is None:
                 result[lane] = agc
             else:
                 result[lane] = agc[sel]
@@ -6451,16 +6451,16 @@ def ctle_map(sel = None, val1 = None, val2 = None, lane = None):
                 #map2 = (rreg(c.rx_agc_map2_addr, lane) | 0xf) & ((val<<12) | 0x0fff)
                 map2 = (rreg(c.rx_agc_map2_addr, lane) & 0x0fff) | ((val<<12) & 0xf000)
                 wreg(c.rx_agc_map2_addr, map2, lane)
-    else:
-        if result != {}:
-            if sel == None:
-                for key in range(8):
-                    print (key)
-                    for lane in lanes:
-                        print (result[lane][key])
-                    print (' ')
-            else:
-                return result
+    #else:
+    if result != {}:
+        if sel == None:
+            for key in range(8):
+                print (key)
+                for lane in lanes:
+                    print (result[lane][key])
+                print (' ')
+        else:
+            return result
  
                 
 def delta(val = None, lane = None):
@@ -6468,13 +6468,13 @@ def delta(val = None, lane = None):
     result = {}
     for lane in lanes:
         c = Pam4Reg if lane_mode_list[lane].lower() == 'pam4' else NrzReg  
-        if val == None:
+        if val is None:
             result[lane] = twos_to_int(rreg(c.rx_delta_addr, lane), 7)
         else:
             wreg(c.rx_delta_ow_addr, int_to_twos(val, 7), lane)
             wreg(c.rx_delta_owen_addr, 0x1, lane)
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
         
 def dac(val = None, lane = None):
     lanes = get_lane_list(lane)
@@ -6488,8 +6488,8 @@ def dac(val = None, lane = None):
         
         dac_v = rreg(c.rx_dac_addr, lane)
         result[lane] = dac_v
-    else:
-        if result != {}: return result        
+    #else:
+    if result != {}: return result        
 def kp(val = None, lane = None, print_en=1):
     lanes = get_lane_list(lane)
     result = {}
@@ -6652,7 +6652,7 @@ def edge(edge1 = None, edge2 = None, edge3 = None, edge4 = None, lane = None):
     result = {}
     c = Pam4Reg
     for lane in lanes:
-        if edge1 == edge2 == edge3 == edge4 == None:
+        if edge1 == edge2 == edge3 == edge4 is None:
             edge1_v = rreg(c.rx_edge1_addr, lane)
             edge2_v = rreg(c.rx_edge2_addr, lane)
             edge3_v = rreg(c.rx_edge3_addr, lane)
@@ -6667,8 +6667,8 @@ def edge(edge1 = None, edge2 = None, edge3 = None, edge4 = None, lane = None):
                 wreg(c.rx_edge3_addr, edge3, lane)
             if edge4 != None:
                 wreg(c.rx_edge4_addr, edge4, lane)
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
         
 def get_err(lane = None):
     
@@ -6685,14 +6685,14 @@ def get_err(lane = None):
         else:
             err = long(rreg(c.rx_err_cntr_msb_addr, lane)<<16) + rreg(c.rx_err_cntr_lsb_addr, lane)
             result[lane] = err
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
 ####################################################################################################
 # 
 # GET ISI Residual Taps
 ####################################################################################################
 def sw_pam4_isi(b0=None, dir=0, isi_tap_range=range(0,9), lane=None, print_en=0):
-    if lane==None: lane=gLane[0]
+    if lane is None: lane=gLane[0]
     result={}
     if fw_loaded(print_en=0):
         #print("\n...sw_nrz_isi: Slice %d Lane %2d has FW Loaded. Exiting!"%(gSlice,lane))
@@ -6704,9 +6704,9 @@ def sw_pam4_isi(b0=None, dir=0, isi_tap_range=range(0,9), lane=None, print_en=0)
         return result
 
         
-    print_en2=0
+    #print_en2=0
     
-    if b0==None:
+    if b0 is None:
         print_en=1
         b0=2
     else:
@@ -6756,7 +6756,7 @@ def sw_pam4_isi(b0=None, dir=0, isi_tap_range=range(0,9), lane=None, print_en=0)
             wait_for_bp1_timeout += 1
             if wait_for_bp1_timeout > 5000:
                 print("\nGet Tap Value FULL (1)***>> Timed out waiting for read_state_counter=0, before starting Getting Taps")
-                if print_en2: print (bp1(lane=lane)[lane][-1])
+                #if print_en2: print (bp1(lane=lane)[lane][-1])
                 bp2(0,0x12,lane=lane)
                 bp1(0,0x12,lane=lane)
                 break
@@ -6791,7 +6791,7 @@ def sw_pam4_isi(b0=None, dir=0, isi_tap_range=range(0,9), lane=None, print_en=0)
         if (minus>2047): minus = minus - 4096
         diff_margin = plus - minus 
         diff_margin_f = ((float(diff_margin & 0x0fff)/2048)+1)%2-1
-        if print_en2: print ("%3d,%2d,%2d,%5d,%5d,%5d,%8.4f "  % (i, b0, dir, plus, minus, diff_margin, diff_margin_f))
+        #if print_en2: print ("%3d,%2d,%2d,%5d,%5d,%5d,%8.4f "  % (i, b0, dir, plus, minus, diff_margin, diff_margin_f))
     
         if abs(plus) == 2048 or abs(minus) == 2048:
             print("\nGet Tap Value FULL ***>> Margin saturated to +/-2048 for tap %d"%i)
@@ -7034,15 +7034,15 @@ def bb_nrz(en = None, lane = None):
             bb = rreg(c.rx_bb_en_addr, lane)
             delta_en = rreg(c.rx_delta_adapt_en_addr, lane)
         result[lane] = bb, delta_en
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
 
 def ffe_pu(en = None, lane = None):
     lanes = get_lane_list(lane)
     c = Pam4Reg
     result = {}
     for lane in lanes:
-        if en == None:
+        if en is None:
             pu1 = rreg(c.rx_ffe_k1_pu_addr, lane)
             pu2 = rreg(c.rx_ffe_k2_pu_addr, lane)
             pu3 = rreg(c.rx_ffe_k3_pu_addr, lane)
@@ -7053,8 +7053,8 @@ def ffe_pu(en = None, lane = None):
             wreg(c.rx_ffe_k2_pu_addr, en, lane)
             wreg(c.rx_ffe_k3_pu_addr, en, lane)
             wreg(c.rx_ffe_k4_pu_addr, en, lane)
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
     
 def ffe_taps (k1=None, k2=None, k3=None, k4=None, s1=None, s2=None, sf=None, lane=None):
 
@@ -7118,7 +7118,7 @@ def ffe_taps (k1=None, k2=None, k3=None, k4=None, s1=None, s2=None, sf=None, lan
             wreg(c.rx_ffe_sf_msb_addr, rx_ffe_sf_gray_msb, lane)
             wreg(c.rx_ffe_sf_lsb_addr, rx_ffe_sf_gray_lsb, lane)
             
-        if k1==None and k2==None and k3==None and k4==None and s1==None and s2==None and sf==None:
+        if k1==None and k2==None and k3==None and k4==None and s1==None and s2==None and sf is None:
             pol1 = rreg(c.rx_ffe_pol1_addr, lane)
             rx_ffe_k1_msb = Gray_Bin(rreg(c.rx_ffe_k1_msb_addr, lane))
             rx_ffe_k1_lsb = Gray_Bin(rreg(c.rx_ffe_k1_lsb_addr, lane))
@@ -7153,8 +7153,8 @@ def ffe_taps (k1=None, k2=None, k3=None, k4=None, s1=None, s2=None, sf=None, lan
             
             result[lane] = rx_ffe_k1_bin, rx_ffe_k2_bin, rx_ffe_k3_bin, rx_ffe_k4_bin, rx_ffe_s1_bin, rx_ffe_s2_bin, rx_ffe_sf_bin
         
-    else:
-        if result != {}: return result
+    #else:
+    if result != {}: return result
         
 
 ####################################################################################################  
@@ -7894,7 +7894,7 @@ def fw_config_retimer (mode=None, lane=range(8), cross_mode=False,print_en=0):
     retimer_en=1;
     LT_en=1 if 'LT' in mode.upper() else 0
 
-    if mode==None: # or all(ln >= 8 for ln in A_lanes): # if any of the A-lanes > 8
+    if mode is None: # or all(ln >= 8 for ln in A_lanes): # if any of the A-lanes > 8
         print("\n*** Instruct the FW to configure an A+B lane in retimer mode"),
         print("\n*** Options: "),
         print("\n***         mode = 'pam4', 'pam4-LT', 'nrz'/'nrz25'/'nrz-LT', 'nrz10', 'nrz20'"),
@@ -7989,7 +7989,7 @@ def fw_config_loopback (mode=None, lane=range(16), print_en=0):
     
     Loopback_en=1;
 
-    if mode==None: 
+    if mode is None: 
         print("\n*** Instruct the FW to configure an A+B lane in Loopback mode"),
         print("\n*** Options: "),
         print("\n***         mode = 'pam4', 'nrz'/'nrz25'/'nrz10'/'nrz20'"),
@@ -8591,7 +8591,7 @@ def init_lane_nrz(datarate=None, input_mode='ac',lane=None):
     global gEncodingMode
     c=NrzReg
     
-    if datarate==None:  datarate=25.78125
+    if datarate is None:  datarate=25.78125
     # if datarate!=None:  datarate=datarate # NRZ at exactly the requested datarate
     # elif '10' in mode:  datarate=10.3125  # NRZ-10G
     # elif '20' in mode:  datarate=20.6250  # NRZ-20G
@@ -9688,7 +9688,7 @@ def tx_taps_table(chan_est=None,lane=None):
             continue
 
         ##### If user does not pass Chan Estimate, get the chan estimate from most recent Rx Adaptation
-        if chan_est==None:
+        if chan_est is None:
             if fw_loaded(print_en=0):
                 dbg_md = 2 if  line_encoding_mode=='pam4' else 1
                 chanEst =(fw_debug_info(section=dbg_md, index=2,lane=ln)[ln]) / 256.0
@@ -9743,7 +9743,7 @@ def fw_serdes_params(lane=None,slice=None,print_en=1):
     
     lanes = get_lane_list(lane)
     
-    if slice==None: # if slice is not defined used gSlice
+    if slice is None: # if slice is not defined used gSlice
         slice=gSlice 
     
     top_pll_A_cap = rreg([0x9501,[12,6]])
@@ -9955,7 +9955,7 @@ def serdes_params(lane=None):
 ####################################################################################################
 def fw_slice_params(lane=None,slice=None,print_en=1):
 
-    if slice==None: # if slice number is not given use gSlice
+    if slice is None: # if slice number is not given use gSlice
         slice=gSlice
     else:
         sel_slice(slice)
@@ -10236,7 +10236,7 @@ def rx_monitor_print (lane=None,slice=None):
 
     Slice=gSlice
     get_lane_mode(lanes)
-    if slice==None: # if slice is not defined used gSlice
+    if slice is None: # if slice is not defined used gSlice
         slice=gSlice
     
     skip="       -"
@@ -10481,7 +10481,7 @@ def rx_monitor_summary (rst=None, slice='all', lane='all', fec_thresh=gFecThresh
 #################################################################################################### 
 def rx_monitor_log (linecard_num=0,phy_num=0,slice_num=None,lane=None, rst=0, adapt_time=-1, header=1, logfile='rx_monitor_log.txt'): 
     global gLaneStats #[per Slice][per lane], [PrbsCount, PrbsCount-1,PrbsCount-2, PrbsRstTime, PrbsLastReadoutTime]
-    if slice_num==None: 
+    if slice_num is None: 
         slice_num = gSlice
     post_fec_ber={}
 
@@ -10795,7 +10795,7 @@ def set_top_pll(pll_side='both', freq=195.3125):
 
     global gRefClkFreq; gRefClkFreq=195.3125
     
-    if pll_side==None: pll_side='both'
+    if pll_side is None: pll_side='both'
     if type(pll_side)==int: 
         if pll_side==0: pll_side='A'
         else: pll_side='B'
@@ -10870,7 +10870,7 @@ def set_top_pll_bypass(pll_side='both', freq=195.3125):
 
     global gRefClkFreq; gRefClkFreq=195.3125
     
-    if pll_side==None: pll_side='both'
+    if pll_side is None: pll_side='both'
     if type(pll_side)==int: 
         if pll_side==0: pll_side='A'
         else: pll_side='B'
@@ -10981,7 +10981,7 @@ def set_bandgap(bg_val=None, lane=None):
                 wregBits(0x0ff,[12],1,lane)
                 wregBits(0x1ff,[12],1,lane)
                 
-    if bg_val==None:
+    if bg_val is None:
         tx_bg_pu  =[] 
         rx_bg_pu  =[] 
         tx_bg_val =[]                
@@ -11240,7 +11240,7 @@ def dc_gain2(ctle_gain1=None, ctle_gain2=None, ffe_gain1=None, ffe_gain2=None, l
         ctle_gain1=None; ctle_gain2=None; ffe_gain1=None;  ffe_gain2=None; lane=None
         print("\n ***> Current settings shown below:")
 
-    if lane==None: lane=gLane
+    if lane is None: lane=gLane
     if type(lane)==int:     lanes=[lane]
     elif type(lane)==list:  lanes=list(lane)
     elif type(lane)==str and lane.upper()=='ALL': 
@@ -11598,7 +11598,7 @@ def fec_ana_read(lane=None):
 ####################################################################################################
 def fec_ana_tei(lane=None):
     FEC_ANA_BASE_ADDR = 0x1C0
-    if lane==None: lane=gLane
+    if lane is None: lane=gLane
    
     wreg(FEC_ANA_BASE_ADDR+0xD,4,lane) #set reading data of TEi low 16 bit
     tei_l = rreg(FEC_ANA_BASE_ADDR+0x7,lane)#read data
@@ -11610,7 +11610,7 @@ def fec_ana_tei(lane=None):
 
 def fec_ana_teo(lane=None):
     FEC_ANA_BASE_ADDR = 0x1C0
-    if lane==None: lane=gLane
+    if lane is None: lane=gLane
     wreg(FEC_ANA_BASE_ADDR+0xD,6,lane ) #set reading data of TEo low 16 bit
     teo_l = rreg(FEC_ANA_BASE_ADDR+0x7,lane)#read data
     wreg(FEC_ANA_BASE_ADDR+0xD,7,lane) #set reading data of TEo high 16 bit
@@ -11621,7 +11621,7 @@ def fec_ana_teo(lane=None):
 
 def fec_ana_sei(lane=None):
     FEC_ANA_BASE_ADDR = 0x1C0
-    if lane==None: lane=gLane
+    if lane is None: lane=gLane
     wreg(FEC_ANA_BASE_ADDR+0xD,0,lane) #set reading data of SEi low 16 bit
     sei_l = rreg(FEC_ANA_BASE_ADDR+0x7,lane)#read data
     wreg(FEC_ANA_BASE_ADDR+0xD,1 ) #set reading data of SEi high 16 bit
@@ -11632,7 +11632,7 @@ def fec_ana_sei(lane=None):
 
 def fec_ana_bei(lane=None):
     FEC_ANA_BASE_ADDR = 0x1C0
-    if lane==None: lane=gLane
+    if lane is None: lane=gLane
     wreg(FEC_ANA_BASE_ADDR+0xD,2,lane) #set reading data of BEi low 16 bit
     bei_l = rreg(FEC_ANA_BASE_ADDR+0x7,lane)#read data
     wreg(FEC_ANA_BASE_ADDR+0xD,3 ,lane) #set reading data of BEi high 16 bit
@@ -13895,7 +13895,7 @@ def cameo_main_loopback(card,mode='LoopbackPam4',speed='100G'):
             config_baldeagle(slice=[0,1], mode='LoopbackPam4',input_mode='ac',lane=None,cross_mode=False)
 
             sel_slice(0)
-            if speed is '400G':
+            if speed == '400G':
                 print("\n*** 400G change polarity mapping\n")
                 RxPolarityMap.append([]); RxPolarityMap[0]=[0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,0]
                 TxPolarityMap.append([]); TxPolarityMap[0]=[1,1,1,1,1,1,1,1,   1,1,1,1,1,1,1,1]
@@ -13908,9 +13908,9 @@ def cameo_main_loopback(card,mode='LoopbackPam4',speed='100G'):
                 for ln in gLane:
                     pol(TxPolarityMap[gSlice][ln],RxPolarityMap[gSlice][ln],ln,0)
 
-    if speed is '400G':
+    if speed == '400G':
         cameo_eq_setting_400G(card)
-    elif speed is '100G':
+    elif speed == '100G':
         cameo_eq_setting_100G(card)
     cameo_drv_close()
     #return cameo_get_result(card,'RetimerPam4')      
@@ -14094,9 +14094,9 @@ def cameo_lib_set_taps(card,speed):
     count = 0
     MAX_LANE_NUM = 16
     MAX_PARAM_NUM = 5
-    if speed is '400g':
+    if speed == '400g':
         MAX_CHIP = 2
-    elif speed is '100g':
+    elif speed == '100g':
         MAX_CHIP = 4
     for first_col in gCameo100G_EQ:
         for item in first_col:
