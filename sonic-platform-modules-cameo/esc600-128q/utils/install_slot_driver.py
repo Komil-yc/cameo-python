@@ -126,8 +126,19 @@ def install_slot_73_cpld_driver(slot_id):
     time.sleep(0.1)
 
 def install_slot_73_sfp(slot_id, bus_no):
+    count= 0
+    timeout_count = 50
     path = INSERT_CARD_MODEL_FILE.format(PATH_73_BUS_BASE+slot_id)
     # path = INSERT_CARD_MODEL_FILE
+    while True:
+        if os.path.exists(path):
+            break
+        count += 1
+        if count > timeout_count:
+            print("detect {} timeout".format(path))
+            sys.exit()
+        time.sleep(0.2)
+
     with open(path, 'r') as fd:
         text_lines = fd.readlines()
         for line in text_lines:
@@ -175,7 +186,9 @@ def install_card_devices(bmc_exist):
             # got index from 1 we need from 0 ==> int(filter(str.isdigit, line))-1
             # install cpld driver for all slot
             install_slot_73_cpld_driver(int(filter(str.isdigit, line))-1)
-            
+       
+        time.sleep(0.5) # add delay to wait cpld sysfile ready
+        for line in text_lines:
             if "is present" in line:
                 # install only the present one
                 # install_slot_73_cpld_driver(int(filter(str.isdigit, line))-1)

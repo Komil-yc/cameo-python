@@ -12,7 +12,7 @@
 #include <linux/uaccess.h>
 #include <linux/string.h>
 
-#define DRIVER_VERSION  "3.0"
+#define DRIVER_VERSION  "3.1"
 
 #define TURN_OFF        0
 #define TURN_ON         1
