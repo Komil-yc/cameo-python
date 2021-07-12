@@ -8,6 +8,7 @@ mr_reboot() {
 }
 
 if [ $# -eq 0 ] || [ $@ = "-p" ] || [ $@ = "--reboot" ] || [ $@ = "--poweroff" ] || [ $@ = "-f" ] || [ $@ = "--force" ];  then
+    sync;sync
     mr_reboot
 elif [ $@ = "--halt" ]; then
     sudo halt

@@ -194,7 +194,7 @@ static ssize_t psu_module_get(struct device *dev, struct device_attribute *da, c
         {0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a},
         {0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a}
     };
-    u16 psu_status [11] = {0}; 
+    u32 psu_status [11] = {0}; 
     u8 mask = 0x1;
     u8 i = 0;
     u16 u16_val = 0;
@@ -745,7 +745,7 @@ static ssize_t themal_status_get(struct device *dev, struct device_attribute *da
     sprintf(buf, "");
     if (attr->index == SENSOR_STATUS)
     {
-        for (i = 1; i <= 5; i++)
+        for (i = 1; i <= 4; i++)
         {
             if (status & res)
             {

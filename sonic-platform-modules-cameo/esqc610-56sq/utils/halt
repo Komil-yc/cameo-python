@@ -11,6 +11,7 @@ if [ $# -eq 0 ] || [ $@ = "--halt" ] || [ $@ = "-f" ] || [ $@ = "--force" ]; the
     #echo halt
     sudo /sbin/halt
 elif [ $@ = "-p" ] || [ $@ = "--reboot" ] || [ $@ = "--poweroff" ]; then
+    sync;sync
     mr_reboot
 else
     echo "unsupported option"

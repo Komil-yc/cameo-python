@@ -1210,7 +1210,7 @@ static ssize_t low_power_all_set(struct device *dev, struct device_attribute *da
         debug_print((KERN_DEBUG "DEBUG : low_power_all_set mutex_lock\n"));
         if (i == TURN_ON)
         {
-            value = 0xf;
+            value = 0xff;
             debug_print((KERN_DEBUG "DEBUG : QSFP_LOW_POWER_ALL value = %x\n",value));
             result_1 = i2c_smbus_write_byte_data(Cameo_CPLD_2_client, 0x60, value);
             result_2 = i2c_smbus_write_byte_data(Cameo_CPLD_2_client, 0x61, value);
@@ -1344,7 +1344,7 @@ static ssize_t low_power_get(struct device *dev, struct device_attribute *da, ch
         debug_print((KERN_DEBUG "DEBUG : LOW_POWER_MODE_%d status = %x\n", i, status));
         for (j = 1; j <= 8; j++)
         {
-            if (j == (i-25))
+            if (j == (i-24))
             {
                 if (status & res)
                 {

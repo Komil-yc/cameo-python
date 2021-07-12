@@ -10,6 +10,7 @@ mr_reboot() {
 if [ $# -eq 0 ] || [ $@ = "--halt" ] || [ $@ = "-f" ] || [ $@ = "--force" ]; then
     sudo /sbin/halt
 elif [ $@ = "-p" ] || [ $@ = "--reboot" ] || [ $@ = "--poweroff" ]; then
+    sync;sync
     mr_reboot
 else
     echo "unsupported option"
